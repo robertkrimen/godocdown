@@ -1,4 +1,4 @@
-### Format package documentation (godoc) as GitHub friendly Markdown
+Format package documentation (godoc) as GitHub friendly Markdown
 
 ## INSTALL
 
