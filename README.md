@@ -1,5 +1,9 @@
 Format package documentation (godoc) as GitHub friendly Markdown
 
-## INSTALL
+## Usage
+
+    godocdown /path/to/package > README.md
+
+## Install
 
     go get github.com/robertkrimen/godocdown
