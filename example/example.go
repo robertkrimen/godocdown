@@ -43,6 +43,13 @@ func Example() {
 }
 
 // ExampleType is a type of nothing
+//		
+//		// Here is how to use it:
+//		return &ExampleType{
+//			First: 1,
+//			Second: "second",
+//			nil,
+//		}
 type ExampleType struct {
 	First int
 	Second string

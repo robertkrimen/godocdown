@@ -33,7 +33,7 @@ func _formatIndent(target, indent, preIndent string) string {
 }
 
 func formatIndent(target string) string {
-	return _formatIndent(target, "    ", "        ")
+	return _formatIndent(target, "", "    ")
 }
 
 func formatCode(target string) string {
@@ -69,7 +69,7 @@ func writeConstantSection(writer io.Writer, list []*doc.Value) bool {
 	empty := true
 	for _, entry := range list {
 		empty = false
-		fmt.Fprintf(writer, "%s\n%s\n", rebraceVarConst(formatCode(sourceOfNode(entry.Decl))), entry.Doc)
+		fmt.Fprintf(writer, "%s\n%s\n", rebraceVarConst(formatCode(sourceOfNode(entry.Decl))), formatIndent(entry.Doc))
 	}
 	return empty
 }
@@ -78,7 +78,7 @@ func writeVariableSection(writer io.Writer, list []*doc.Value) bool {
 	empty := true
 	for _, entry := range list {
 		empty = false
-		fmt.Fprintf(writer, "%s\n%s\n", rebraceVarConst(formatCode(sourceOfNode(entry.Decl))), entry.Doc)
+		fmt.Fprintf(writer, "%s\n%s\n", rebraceVarConst(formatCode(sourceOfNode(entry.Decl))), formatIndent(entry.Doc))
 	}
 	return empty
 }
@@ -91,7 +91,7 @@ func writeFunctionSection(writer io.Writer, heading string, list []*doc.Func) bo
 		if entry.Recv != "" {
 			receiver = fmt.Sprintf("(%s) ", entry.Recv)
 		}
-		fmt.Fprintf(writer, "%s func %s%s\n\n%s\n%s\n", heading, receiver, entry.Name, formatCode(sourceOfNode(entry.Decl)), entry.Doc)
+		fmt.Fprintf(writer, "%s func %s%s\n\n%s\n%s\n", heading, receiver, entry.Name, formatCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
 	}
 	return empty
 }
@@ -100,7 +100,7 @@ func writeTypeSection(writer io.Writer, list []*doc.Type) bool {
 	empty := true
 	for _, entry := range list {
 		empty = false
-		fmt.Fprintf(writer, "#### type %s\n\n%s\n\n%s\n", entry.Name, formatCode(sourceOfNode(entry.Decl)), entry.Doc)
+		fmt.Fprintf(writer, "#### type %s\n\n%s\n\n%s\n", entry.Name, formatCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
 		writeConstantSection(writer, entry.Consts)
 		writeVariableSection(writer, entry.Vars)
 		writeFunctionSection(writer, "####", entry.Funcs)

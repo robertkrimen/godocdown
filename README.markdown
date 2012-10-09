@@ -2,7 +2,7 @@ Format package documentation (godoc) as GitHub friendly Markdown
 
 ## Usage
 
-    godocdown /path/to/package > README.md
+    godocdown /path/to/package > README.markdown
 
 ## Install
 

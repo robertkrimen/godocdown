@@ -9,5 +9,5 @@ build:
 	go build -o godocdown
 
 style: build
-	./godocdown example > test/README.md
+	./godocdown example > test/README.markdown
 	cd test && git commit -m 'WIP' * && git push
