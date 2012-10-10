@@ -25,6 +25,9 @@ var (
 	synopsisHeading_Regexp *regexp.Regexp = regexp.MustCompile("(?m)^([A-Za-z0-9]+)$")
 )
 
+var (
+	signature = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
+)
 
 func _formatIndent(target, indent, preIndent string) string {
 	var buffer bytes.Buffer
@@ -146,5 +149,9 @@ func main() {
 		return
 	}
 
-	fmt.Println(buffer.String())
+	fmt.Println(strings.TrimSpace(buffer.String()))
+
+	if *signature {
+		fmt.Printf("\n--\n**godocdown** http://github.com/robertkrimen/godocdown\n")
+	}
 }

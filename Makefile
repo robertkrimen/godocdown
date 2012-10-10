@@ -1,4 +1,4 @@
-.PHONY: test build style
+.PHONY: test build test-example release
 
 TEST := ./example
 
@@ -8,6 +8,9 @@ test:
 build:
 	go build -o godocdown
 
-style: build
+test-example: build
 	./godocdown example > test/README.markdown
 	cd test && git commit -m 'WIP' * && git push
+
+release:
+	./godocdown $(HOME)/go/src/pkg/strings > example.markdown
