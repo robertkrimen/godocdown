@@ -23,6 +23,7 @@ var (
 	fset *token.FileSet
 	varConstBrace_Regexp *regexp.Regexp = regexp.MustCompile("(?s)^(\\s*var|\\s*const) \\(\n(.*)\n(\\s*)\\)")
 	synopsisHeading_Regexp *regexp.Regexp = regexp.MustCompile("(?m)^([A-Za-z0-9]+)$")
+	strip_Regexp *regexp.Regexp = regexp.MustCompile("(?m)^\\s*// contains filtered or unexported fields\\s*\n")
 )
 
 var (
@@ -65,7 +66,7 @@ func sourceOfNode(target interface{}) string {
 	if err != nil {
 		return ""
 	}
-	return buffer.String()
+	return strip_Regexp.ReplaceAllString(buffer.String(), "")
 }
 
 func writeConstantSection(writer io.Writer, list []*doc.Value) bool {

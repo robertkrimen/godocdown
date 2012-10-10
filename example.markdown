@@ -321,7 +321,6 @@ space removed, as defined by Unicode.
 
 ```go
 type Reader struct {
-	// contains filtered or unexported fields
 }
 ```
 
@@ -390,7 +389,6 @@ func (r *Reader) UnreadRune() error
 
 ```go
 type Replacer struct {
-	// contains filtered or unexported fields
 }
 ```
 

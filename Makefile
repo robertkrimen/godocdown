@@ -12,5 +12,5 @@ test-example: build
 	./godocdown example > test/README.markdown
 	cd test && git commit -m 'WIP' * && git push
 
-release:
+release: build
 	./godocdown $(HOME)/go/src/pkg/strings > example.markdown

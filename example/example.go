@@ -55,6 +55,9 @@ type ExampleType struct {
 	Second string
 	Third float64
 	Parent *ExampleType
+
+	first int
+	hidden string
 }
 
 func (ExampleType) Set() bool {
