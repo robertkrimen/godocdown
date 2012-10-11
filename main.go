@@ -10,7 +10,9 @@ import (
 	"os"
 	"strings"
 	"bytes"
+	"path/filepath"
 	"io"
+	"io/ioutil"
 	"regexp"
 )
 
@@ -131,6 +133,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Could not parse \"%s\": %v\n", path, err)
 	}
 
+	importLine := ""
+	if read, err := ioutil.ReadFile(filepath.Join(path, ".import")); err == nil {
+		importLine = strings.Split(string(read), "\n")[0]
+	}
+
 	var buffer bytes.Buffer
 
 	// There should be only 1 package, but...
@@ -138,6 +145,9 @@ func main() {
 		document := doc.New(pkg, ".", 0)
 
 		fmt.Fprintf(&buffer, "# %s\n--\n", document.Name)
+		if (importLine != "") {
+			fmt.Fprintf(&buffer, "    import \"%s\"\n\n", importLine)
+		}
 		fmt.Fprintf(&buffer, "%s\n", headifySynopsis(document.Doc))
 		fmt.Fprintf(&buffer, "## Usage\n\n")
 		writeConstantSection(&buffer, document.Consts)

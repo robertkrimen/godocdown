@@ -9,7 +9,7 @@ build:
 	go build -o godocdown
 
 test-example: build
-	./godocdown example > test/README.markdown
+	./godocdown --signature example > test/README.markdown
 	cd test && git commit -m 'WIP' * && git push
 
 release: build
