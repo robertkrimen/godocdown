@@ -3,14 +3,14 @@
 TEST := ./example
 
 test:
-	go run main.go $(TEST)
+	go run godocdown/main.go $(TEST)
 
 build:
-	go build -o godocdown
+	cd godocdown && go build -o ../.godocdown
 
 test-example: build
-	./godocdown --signature example > test/README.markdown
+	./.godocdown --signature example > test/README.markdown
 	cd test && git commit -m 'WIP' * && git push
 
 release: build
-	./godocdown $(HOME)/go/src/pkg/strings > example.markdown
+	./.godocdown $(HOME)/go/src/pkg/strings > example.markdown

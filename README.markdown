@@ -11,7 +11,7 @@ Format package documentation (godoc) as GitHub friendly Markdown
 
 ## Install
 
-    go get github.com/robertkrimen/godocdown
+    go get github.com/robertkrimen/godocdown/godocdown
 
 ## Example
 
