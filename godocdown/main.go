@@ -28,8 +28,10 @@ var (
 	strip_Regexp *regexp.Regexp = regexp.MustCompile("(?m)^\\s*// contains filtered or unexported fields\\s*\n")
 )
 
+// Flags
 var (
-	signature = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
+	signature_flag = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
+	plain_flag = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
 )
 
 type _document struct {
@@ -48,9 +50,11 @@ func formatIndent(target string) string {
 }
 
 func formatCode(target string) string {
+	if *plain_flag {
+		return _formatIndent(target, "    ", "")
+	}
 	return fmt.Sprintf("```go\n%s\n```", target)
 }
-
 
 func headifySynopsis(target string) string {
 	return synopsisHeading_Regexp.ReplaceAllStringFunc(target, func(heading string) string {
@@ -208,7 +212,7 @@ func main() {
 
 	fmt.Println(strings.TrimSpace(buffer.String()))
 
-	if *signature {
+	if *signature_flag {
 		fmt.Printf("\n--\n**godocdown** http://github.com/robertkrimen/godocdown\n")
 	}
 }
