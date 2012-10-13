@@ -32,6 +32,11 @@ var (
 	signature = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
 )
 
+type _document struct {
+	pkg *doc.Package
+	isCommand bool
+}
+
 func _formatIndent(target, indent, preIndent string) string {
 	var buffer bytes.Buffer
 	doc.ToText(&buffer, target, indent, preIndent, punchCardWidth-2*len(indent))
@@ -142,18 +147,59 @@ func main() {
 
 	// There should be only 1 package, but...
 	for _, pkg := range pkgs {
-		document := doc.New(pkg, ".", 0)
-
-		fmt.Fprintf(&buffer, "# %s\n--\n", document.Name)
-		if (importLine != "") {
-			fmt.Fprintf(&buffer, "    import \"%s\"\n\n", importLine)
+		isCommand := false
+		pkg := doc.New(pkg, ".", 0)
+		switch pkg.Name {
+		case "main":
+			// We're probably a command, but by convention, documentation
+			// should be in the documentation package:
+			// http://golang.org/doc/articles/godoc_documenting_go_code.html
+			continue
+		case "documentation":
+			// We're a command, this package/file contains the documentation
+			isCommand = true
+		default:
+			// Just a regular package
 		}
-		fmt.Fprintf(&buffer, "%s\n", headifySynopsis(document.Doc))
-		fmt.Fprintf(&buffer, "## Usage\n\n")
-		writeConstantSection(&buffer, document.Consts)
-		writeVariableSection(&buffer, document.Vars)
-		writeFunctionSection(&buffer, "####", document.Funcs)
-		writeTypeSection(&buffer, document.Types)
+
+		document := &_document{
+			pkg: pkg,
+			isCommand: isCommand,
+		}
+
+		if isCommand {
+			// TODO Get name from directory
+		}
+
+		// Header
+		fmt.Fprintf(&buffer, "# %s\n--\n", document.pkg.Name)
+
+		if !document.isCommand {
+			// Import
+			if (importLine != "") {
+				fmt.Fprintf(&buffer, "    import \"%s\"\n\n", importLine)
+			}
+		}
+
+		// Synopsis
+		fmt.Fprintf(&buffer, "%s\n", headifySynopsis(document.pkg.Doc))
+
+		if !document.isCommand {
+			// Usage
+			fmt.Fprintf(&buffer, "## Usage\n\n")
+
+			// Constant Section
+			writeConstantSection(&buffer, document.pkg.Consts)
+
+			// Variable Section
+			writeVariableSection(&buffer, document.pkg.Vars)
+
+			// Function Section
+			writeFunctionSection(&buffer, "####", document.pkg.Funcs)
+
+			// Type Section
+			writeTypeSection(&buffer, document.pkg.Types)
+		}
 	}
 
 	if debug {
