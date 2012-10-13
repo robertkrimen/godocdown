@@ -10,10 +10,10 @@ import (
 	"os"
 	"strings"
 	"bytes"
-	"path/filepath"
 	"io"
 	"io/ioutil"
 	"regexp"
+	"path/filepath"
 )
 
 const (
@@ -35,6 +35,7 @@ var (
 )
 
 type _document struct {
+	name string
 	pkg *doc.Package
 	isCommand bool
 }
@@ -130,6 +131,16 @@ func main() {
 	if path == "" {
 		path = "."
 	}
+
+	fullPath := ""
+	{
+		path, err := filepath.Abs(path)
+		if err != nil {
+			panic(err)
+		}
+		fullPath = path
+	}
+
 	fset = token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, path, func(file os.FileInfo) bool {
 		name := file.Name()
@@ -152,6 +163,7 @@ func main() {
 	// There should be only 1 package, but...
 	for _, pkg := range pkgs {
 		isCommand := false
+		name := ""
 		pkg := doc.New(pkg, ".", 0)
 		switch pkg.Name {
 		case "main":
@@ -161,12 +173,15 @@ func main() {
 			continue
 		case "documentation":
 			// We're a command, this package/file contains the documentation
+			_, name = filepath.Split(fullPath)
 			isCommand = true
 		default:
+			name = pkg.Name
 			// Just a regular package
 		}
 
 		document := &_document{
+			name: name,
 			pkg: pkg,
 			isCommand: isCommand,
 		}
@@ -176,7 +191,7 @@ func main() {
 		}
 
 		// Header
-		fmt.Fprintf(&buffer, "# %s\n--\n", document.pkg.Name)
+		fmt.Fprintf(&buffer, "# %s\n--\n", document.name)
 
 		if !document.isCommand {
 			// Import
