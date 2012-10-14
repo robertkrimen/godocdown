@@ -142,15 +142,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	fullPath := ""
-	{
-		path, err := filepath.Abs(path)
-		if err != nil {
-			panic(err)
-		}
-		fullPath = path
-	}
-
 	fset = token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, path, func(file os.FileInfo) bool {
 		name := file.Name()
@@ -163,9 +154,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Could not parse \"%s\": %v\n", path, err)
 	}
 
-	importLine := ""
+	dotImport := ""
 	if read, err := ioutil.ReadFile(filepath.Join(path, ".import")); err == nil {
-		importLine = strings.Split(string(read), "\n")[0]
+		dotImport = strings.TrimSpace(strings.Split(string(read), "\n")[0])
 	}
 
 	var buffer bytes.Buffer
@@ -183,7 +174,13 @@ func main() {
 			continue
 		case "documentation":
 			// We're a command, this package/file contains the documentation
-			_, name = filepath.Split(fullPath)
+			// path is used to get the containing directory in the case of
+			// command documentation
+			path, err := filepath.Abs(path)
+			if err != nil {
+				panic(err)
+			}
+			_, name = filepath.Split(path)
 			isCommand = true
 		default:
 			name = pkg.Name
@@ -205,8 +202,8 @@ func main() {
 
 		if !document.isCommand {
 			// Import
-			if (importLine != "") {
-				fmt.Fprintf(&buffer, "    import \"%s\"\n\n", importLine)
+			if (dotImport != "") {
+				fmt.Fprintf(&buffer, space(4) + "import \"%s\"\n\n", dotImport)
 			}
 		}
 
