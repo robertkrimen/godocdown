@@ -23,9 +23,10 @@ const (
 
 var (
 	fset *token.FileSet
-	varConstBrace_Regexp *regexp.Regexp = regexp.MustCompile("(?s)^(\\s*var|\\s*const) \\(\n(.*)\n(\\s*)\\)")
-	synopsisHeading_Regexp *regexp.Regexp = regexp.MustCompile("(?m)^([A-Za-z0-9]+)$")
-	strip_Regexp *regexp.Regexp = regexp.MustCompile("(?m)^\\s*// contains filtered or unexported fields\\s*\n")
+	synopsisHeading_Regexp = regexp.MustCompile("(?m)^([A-Za-z0-9]+)$")
+	strip_Regexp = regexp.MustCompile("(?m)^\\s*// contains filtered or unexported fields\\s*\n")
+	indent_Regexp = regexp.MustCompile("(?m)^([^\\n])") // Match at least one character at the start of the line
+
 )
 
 // Flags
@@ -46,13 +47,17 @@ func _formatIndent(target, indent, preIndent string) string {
 	return buffer.String()
 }
 
-func formatIndent(target string) string {
-	return _formatIndent(target, "", "    ")
+func space(width int) string {
+	return strings.Repeat(" ", width)
 }
 
-func formatCode(target string) string {
+func formatIndent(target string) string {
+	return _formatIndent(target, space(0), space(4))
+}
+
+func indentCode(target string) string {
 	if *plain_flag {
-		return _formatIndent(target, "    ", "")
+		return indent(target + "\n", space(4))
 	}
 	return fmt.Sprintf("```go\n%s\n```", target)
 }
@@ -61,14 +66,6 @@ func headifySynopsis(target string) string {
 	return synopsisHeading_Regexp.ReplaceAllStringFunc(target, func(heading string) string {
 		return "### " + heading
 	})
-}
-
-func rebraceVarConst(target string) string {
-	result := varConstBrace_Regexp.FindStringSubmatch(target)
-	if result == nil {
-		return target
-	}
-	return result[1] + " (" + result[2] + result[3] + ")\n"
 }
 
 func sourceOfNode(target interface{}) string {
@@ -85,7 +82,7 @@ func writeConstantSection(writer io.Writer, list []*doc.Value) bool {
 	empty := true
 	for _, entry := range list {
 		empty = false
-		fmt.Fprintf(writer, "%s\n%s\n", rebraceVarConst(formatCode(sourceOfNode(entry.Decl))), formatIndent(entry.Doc))
+		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
 	}
 	return empty
 }
@@ -94,7 +91,7 @@ func writeVariableSection(writer io.Writer, list []*doc.Value) bool {
 	empty := true
 	for _, entry := range list {
 		empty = false
-		fmt.Fprintf(writer, "%s\n%s\n", rebraceVarConst(formatCode(sourceOfNode(entry.Decl))), formatIndent(entry.Doc))
+		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
 	}
 	return empty
 }
@@ -107,7 +104,7 @@ func writeFunctionSection(writer io.Writer, heading string, list []*doc.Func) bo
 		if entry.Recv != "" {
 			receiver = fmt.Sprintf("(%s) ", entry.Recv)
 		}
-		fmt.Fprintf(writer, "%s func %s%s\n\n%s\n%s\n", heading, receiver, entry.Name, formatCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
+		fmt.Fprintf(writer, "%s func %s%s\n\n%s\n%s\n", heading, receiver, entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
 	}
 	return empty
 }
@@ -116,7 +113,7 @@ func writeTypeSection(writer io.Writer, list []*doc.Type) bool {
 	empty := true
 	for _, entry := range list {
 		empty = false
-		fmt.Fprintf(writer, "#### type %s\n\n%s\n\n%s\n", entry.Name, formatCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
+		fmt.Fprintf(writer, "#### type %s\n\n%s\n\n%s\n", entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
 		writeConstantSection(writer, entry.Consts)
 		writeVariableSection(writer, entry.Vars)
 		writeFunctionSection(writer, "####", entry.Funcs)
@@ -125,11 +122,24 @@ func writeTypeSection(writer io.Writer, list []*doc.Type) bool {
 	return empty
 }
 
+func indent(target string, indent string) string {
+	return indent_Regexp.ReplaceAllString(target, indent + "$1")
+}
+
 func main() {
 	flag.Parse()
 	path := flag.Arg(0)
 	if path == "" {
 		path = "."
+	}
+
+	if false {
+		// Test indenting
+		fmt.Printf("0/4/4\n[%s]\n",
+			_formatIndent(fmt.Sprintf("%v\n%4v\n%4v\n", 1, 2, 3), space(4), space(8)))
+		fmt.Printf("0/4/4\n[%s]\n",
+			indent(fmt.Sprintf("%v\n%5v\n\n%5v\n", 1, 2, 3), space(4)))
+		os.Exit(0)
 	}
 
 	fullPath := ""

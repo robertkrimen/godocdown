@@ -3,7 +3,10 @@
 RUN := ./run
 TEST := ./example
 
+export TERST_BASE=$(PWD)
+
 test:
+	go test -i ./godocdown &&  go test ./godocdown
 	go run godocdown/main.go $(TEST)
 
 build:
