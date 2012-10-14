@@ -161,7 +161,7 @@ func main() {
 
 	var buffer bytes.Buffer
 
-	// There should be only 1 package, but...
+	found := false
 	for _, pkg := range pkgs {
 		isCommand := false
 		name := ""
@@ -187,6 +187,7 @@ func main() {
 			// Just a regular package
 		}
 
+		found = true
 		document := &_document{
 			name: name,
 			pkg: pkg,
@@ -226,6 +227,14 @@ func main() {
 			// Type Section
 			writeTypeSection(&buffer, document.pkg.Types)
 		}
+
+		break
+	}
+
+	if !found {
+		rootPath, _ := filepath.Abs(path)
+		fmt.Fprintf(os.Stderr, "No package/documentation found in %s (%s)\n", path, rootPath)
+		os.Exit(64)
 	}
 
 	if debug {
