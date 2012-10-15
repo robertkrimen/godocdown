@@ -116,22 +116,7 @@ func indent(target string, indent string) string {
 	return indent_Regexp.ReplaceAllString(target, indent + "$1")
 }
 
-func main() {
-	flag.Parse()
-	path := flag.Arg(0)
-	if path == "" {
-		path = "."
-	}
-
-	if false {
-		// Test indenting
-		fmt.Printf("0/4/4\n[%s]\n",
-			_formatIndent(fmt.Sprintf("%v\n%4v\n%4v\n", 1, 2, 3), space(4), space(8)))
-		fmt.Printf("0/4/4\n[%s]\n",
-			indent(fmt.Sprintf("%v\n%5v\n\n%5v\n", 1, 2, 3), space(4)))
-		os.Exit(0)
-	}
-
+func loadDocument(path string) (*_document, error) {
 	fset = token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, path, func(file os.FileInfo) bool {
 		name := file.Name()
@@ -141,7 +126,7 @@ func main() {
 		return false
 	}, parser.ParseComments)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not parse \"%s\": %v\n", path, err)
+		return nil, fmt.Errorf("Could not parse \"%s\": %v", path, err)
 	}
 
 	dotImport := ""
@@ -149,9 +134,6 @@ func main() {
 		dotImport = strings.TrimSpace(strings.Split(string(read), "\n")[0])
 	}
 
-	var buffer bytes.Buffer
-
-	found := false
 	for _, pkg := range pkgs {
 		isCommand := false
 		name := ""
@@ -177,7 +159,6 @@ func main() {
 			// Just a regular package
 		}
 
-		found = true
 		document := &_document{
 			name: name,
 			pkg: pkg,
@@ -185,23 +166,44 @@ func main() {
 			dotImport: dotImport,
 		}
 
+		return document, nil
+	}
+
+	return nil, nil
+}
+
+func main() {
+	flag.Parse()
+	path := flag.Arg(0)
+	if path == "" {
+		path = "."
+	}
+
+	document, err := loadDocument(path)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+	}
+
+	if document == nil {
+		// Nothing found.
+		rootPath, _ := filepath.Abs(path)
+		fmt.Fprintf(os.Stderr, "No package/documentation found in %s (%s)\n", path, rootPath)
+		os.Exit(64)
+	}
+
+	var buffer bytes.Buffer
+	{
 		// Header
 		renderHeaderTo(&buffer, document)
 
 		// Synopsis
 		renderSynopsisTo(&buffer, document)
 
+		// Usage
 		if !document.isCommand {
 			renderUsageTo(&buffer, document)
 		}
-
-		break
-	}
-
-	if !found {
-		rootPath, _ := filepath.Abs(path)
-		fmt.Fprintf(os.Stderr, "No package/documentation found in %s (%s)\n", path, rootPath)
-		os.Exit(64)
 	}
 
 	if debug {
