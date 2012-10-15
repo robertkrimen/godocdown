@@ -6,7 +6,7 @@ Package example is an example package with documentation
 		abc := 1 + 1
 	}()
 
-Install
+Installation
 
 	# This is how to install it:
 	$ curl http://example.com
@@ -16,23 +16,21 @@ Install
 */
 package example
 
-// Constantly,
-//
-// Changing.
+// A constant section
 const Other = 3
 
-// Something?
+// A variable section
 var (
 	This = 1
 
 	this = 0
 
 
-	// Anything?
+	// A description of That
 	That = 2.1
 )
 
-// Some more commentary
+// Another constant section
 const (
 	Another = 0
 	Again = "this"
