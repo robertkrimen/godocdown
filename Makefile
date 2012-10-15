@@ -7,7 +7,7 @@ export TERST_BASE=$(PWD)
 
 test:
 	go test -i ./godocdown &&  go test ./godocdown
-	go run godocdown/main.go $(TEST)
+	cd godocdown && go run main.go render.go ../$(TEST)
 
 build:
 	cd godocdown && go build -o ../$(RUN)

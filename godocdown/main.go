@@ -10,7 +10,6 @@ import (
 	"os"
 	"strings"
 	"bytes"
-	"io"
 	"io/ioutil"
 	"regexp"
 	"path/filepath"
@@ -35,22 +34,13 @@ var (
 
 )
 
-var Style = struct {
-	IncludeImport bool
-
-	SynopsisHeader string
-	HeadifySynopsis bool
-
-	ConstantHeader string
-	VariableHeader string
-	FunctionHeader string
-	TypeHeader string
-	TypeFunctionHeader string
-}{
+var DefaultStyle = Style{
 	IncludeImport: true,
 
 	SynopsisHeader: "###",
 	HeadifySynopsis: true,
+
+	UsageHeader: "## Usage\n",
 
 	ConstantHeader: "####",
 	VariableHeader: "####",
@@ -58,11 +48,28 @@ var Style = struct {
 	TypeHeader: "####",
 	TypeFunctionHeader: "####",
 }
+var RenderStyle = DefaultStyle
+
+type Style struct {
+	IncludeImport bool
+
+	SynopsisHeader string
+	HeadifySynopsis bool
+
+	UsageHeader string
+
+	ConstantHeader string
+	VariableHeader string
+	FunctionHeader string
+	TypeHeader string
+	TypeFunctionHeader string
+}
 
 type _document struct {
 	name string
 	pkg *doc.Package
 	isCommand bool
+	dotImport string
 }
 
 func _formatIndent(target, indent, preIndent string) string {
@@ -87,11 +94,11 @@ func indentCode(target string) string {
 }
 
 func headifySynopsis(target string) string {
-	if !Style.HeadifySynopsis {
+	if !RenderStyle.HeadifySynopsis {
 		return target
 	}
 	return synopsisHeading_Regexp.ReplaceAllStringFunc(target, func(heading string) string {
-		return fmt.Sprintf("%s %s", Style.SynopsisHeader, heading)
+		return fmt.Sprintf("%s %s", RenderStyle.SynopsisHeader, heading)
 	})
 }
 
@@ -107,47 +114,6 @@ func sourceOfNode(target interface{}) string {
 
 func indent(target string, indent string) string {
 	return indent_Regexp.ReplaceAllString(target, indent + "$1")
-}
-
-func writeConstantSection(writer io.Writer, list []*doc.Value) {
-	for _, entry := range list {
-		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
-	}
-}
-
-func writeVariableSection(writer io.Writer, list []*doc.Value) {
-	for _, entry := range list {
-		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
-	}
-}
-
-func writeFunctionSection(writer io.Writer, list []*doc.Func, inTypeSection bool) {
-
-	header := Style.FunctionHeader
-	if inTypeSection {
-		header = Style.TypeFunctionHeader
-	}
-
-	for _, entry := range list {
-		receiver := " "
-		if entry.Recv != "" {
-			receiver = fmt.Sprintf("(%s) ", entry.Recv)
-		}
-		fmt.Fprintf(writer, "%s func %s%s\n\n%s\n%s\n", header, receiver, entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
-	}
-}
-
-func writeTypeSection(writer io.Writer, list []*doc.Type) {
-
-	header := Style.TypeHeader
-
-	for _, entry := range list {
-		fmt.Fprintf(writer, "%s type %s\n\n%s\n\n%s\n", header, entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
-		writeConstantSection(writer, entry.Consts)
-		writeVariableSection(writer, entry.Vars)
-		writeFunctionSection(writer, entry.Funcs, true)
-		writeFunctionSection(writer, entry.Methods, true)
-	}
 }
 
 func main() {
@@ -216,38 +182,17 @@ func main() {
 			name: name,
 			pkg: pkg,
 			isCommand: isCommand,
+			dotImport: dotImport,
 		}
 
 		// Header
-		fmt.Fprintf(&buffer, "# %s\n--\n", document.name)
-
-		if !document.isCommand {
-			// Import
-			if Style.IncludeImport {
-				if (dotImport != "") {
-					fmt.Fprintf(&buffer, space(4) + "import \"%s\"\n\n", dotImport)
-				}
-			}
-		}
+		renderHeaderTo(&buffer, document)
 
 		// Synopsis
-		fmt.Fprintf(&buffer, "%s\n", headifySynopsis(document.pkg.Doc))
+		renderSynopsisTo(&buffer, document)
 
 		if !document.isCommand {
-			// Usage
-			fmt.Fprintf(&buffer, "## Usage\n\n")
-
-			// Constant Section
-			writeConstantSection(&buffer, document.pkg.Consts)
-
-			// Variable Section
-			writeVariableSection(&buffer, document.pkg.Vars)
-
-			// Function Section
-			writeFunctionSection(&buffer, document.pkg.Funcs, false)
-
-			// Type Section
-			writeTypeSection(&buffer, document.pkg.Types)
+			renderUsageTo(&buffer, document)
 		}
 
 		break
