@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"regexp"
 	"path/filepath"
+	tme "time"
 )
 
 const (
@@ -51,6 +52,20 @@ var DefaultStyle = Style{
 	IncludeSignature: false,
 }
 var RenderStyle = DefaultStyle
+
+func init() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		executable, err := os.Stat(os.Args[0])
+		if err != nil {
+			return
+		}
+		time := executable.ModTime()
+		since := tme.Since(time)
+		fmt.Fprintf(os.Stderr, "---\n%s (%.2f)\n", time.Format("2006-01-02 15:04 MST"), since.Minutes())
+	}
+}
 
 type Style struct {
 	IncludeImport bool
