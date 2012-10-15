@@ -4,6 +4,7 @@ import (
 	"strings"
 	"bytes"
 	"testing"
+	"regexp"
 	. "github.com/robertkrimen/terst"
 )
 
@@ -11,6 +12,66 @@ func TestIndent(t *testing.T) {
 	Terst(t)
 
 	Is(indent("1\n  2\n\n  3\n  4\n", "  "), "  1\n    2\n\n    3\n    4\n")
+}
+
+func TestHeadlineSynopsis(t *testing.T) {
+	Terst(t)
+
+	synopsis := `
+Headline
+The previous line is a single word.
+
+a Title Is Without punctuation
+
+	In this mode, a title can be something without punctuation
+
+Only Title Casing Is Allowed Here
+
+What it says on the tin above.
+	`
+	is := func(scanner *regexp.Regexp, want string){
+		have := headlineSynopsis(synopsis, "#", scanner)
+		Is(strings.TrimSpace(have), strings.TrimSpace(want))
+	}
+
+	is(synopsisHeading1Word_Regexp, `
+# Headline
+The previous line is a single word.
+
+a Title Is Without punctuation
+
+	In this mode, a title can be something without punctuation
+
+Only Title Casing Is Allowed Here
+
+What it says on the tin above.
+	`)
+
+	is(synopsisHeadingTitleCase_Regexp, `
+# Headline
+The previous line is a single word.
+
+a Title Is Without punctuation
+
+	In this mode, a title can be something without punctuation
+
+# Only Title Casing Is Allowed Here
+
+What it says on the tin above.
+	`)
+
+	is(synopsisHeadingTitle_Regexp, `
+# Headline
+The previous line is a single word.
+
+# a Title Is Without punctuation
+
+	In this mode, a title can be something without punctuation
+
+# Only Title Casing Is Allowed Here
+
+What it says on the tin above.
+	`)
 }
 
 func Test(t *testing.T) {
