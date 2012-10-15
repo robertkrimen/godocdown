@@ -21,6 +21,12 @@ const (
 	debug = false
 )
 
+// Flags
+var (
+	signature_flag = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
+	plain_flag = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
+)
+
 var (
 	fset *token.FileSet
 	synopsisHeading_Regexp = regexp.MustCompile("(?m)^([A-Za-z0-9]+)$")
@@ -29,11 +35,29 @@ var (
 
 )
 
-// Flags
-var (
-	signature_flag = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
-	plain_flag = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
-)
+var Style = struct {
+	IncludeImport bool
+
+	SynopsisHeader string
+	HeadifySynopsis bool
+
+	ConstantHeader string
+	VariableHeader string
+	FunctionHeader string
+	TypeHeader string
+	TypeFunctionHeader string
+}{
+	IncludeImport: true,
+
+	SynopsisHeader: "###",
+	HeadifySynopsis: true,
+
+	ConstantHeader: "####",
+	VariableHeader: "####",
+	FunctionHeader: "####",
+	TypeHeader: "####",
+	TypeFunctionHeader: "####",
+}
 
 type _document struct {
 	name string
@@ -63,8 +87,11 @@ func indentCode(target string) string {
 }
 
 func headifySynopsis(target string) string {
+	if !Style.HeadifySynopsis {
+		return target
+	}
 	return synopsisHeading_Regexp.ReplaceAllStringFunc(target, func(heading string) string {
-		return "### " + heading
+		return fmt.Sprintf("%s %s", Style.SynopsisHeader, heading)
 	})
 }
 
@@ -78,52 +105,49 @@ func sourceOfNode(target interface{}) string {
 	return strip_Regexp.ReplaceAllString(buffer.String(), "")
 }
 
-func writeConstantSection(writer io.Writer, list []*doc.Value) bool {
-	empty := true
-	for _, entry := range list {
-		empty = false
-		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
-	}
-	return empty
+func indent(target string, indent string) string {
+	return indent_Regexp.ReplaceAllString(target, indent + "$1")
 }
 
-func writeVariableSection(writer io.Writer, list []*doc.Value) bool {
-	empty := true
+func writeConstantSection(writer io.Writer, list []*doc.Value) {
 	for _, entry := range list {
-		empty = false
 		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
 	}
-	return empty
 }
 
-func writeFunctionSection(writer io.Writer, heading string, list []*doc.Func) bool {
-	empty := true
+func writeVariableSection(writer io.Writer, list []*doc.Value) {
 	for _, entry := range list {
-		empty = false
+		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
+	}
+}
+
+func writeFunctionSection(writer io.Writer, list []*doc.Func, inTypeSection bool) {
+
+	header := Style.FunctionHeader
+	if inTypeSection {
+		header = Style.TypeFunctionHeader
+	}
+
+	for _, entry := range list {
 		receiver := " "
 		if entry.Recv != "" {
 			receiver = fmt.Sprintf("(%s) ", entry.Recv)
 		}
-		fmt.Fprintf(writer, "%s func %s%s\n\n%s\n%s\n", heading, receiver, entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
+		fmt.Fprintf(writer, "%s func %s%s\n\n%s\n%s\n", header, receiver, entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
 	}
-	return empty
 }
 
-func writeTypeSection(writer io.Writer, list []*doc.Type) bool {
-	empty := true
+func writeTypeSection(writer io.Writer, list []*doc.Type) {
+
+	header := Style.TypeHeader
+
 	for _, entry := range list {
-		empty = false
-		fmt.Fprintf(writer, "#### type %s\n\n%s\n\n%s\n", entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
+		fmt.Fprintf(writer, "%s type %s\n\n%s\n\n%s\n", header, entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
 		writeConstantSection(writer, entry.Consts)
 		writeVariableSection(writer, entry.Vars)
-		writeFunctionSection(writer, "####", entry.Funcs)
-		writeFunctionSection(writer, "####", entry.Methods)
+		writeFunctionSection(writer, entry.Funcs, true)
+		writeFunctionSection(writer, entry.Methods, true)
 	}
-	return empty
-}
-
-func indent(target string, indent string) string {
-	return indent_Regexp.ReplaceAllString(target, indent + "$1")
 }
 
 func main() {
@@ -194,17 +218,15 @@ func main() {
 			isCommand: isCommand,
 		}
 
-		if isCommand {
-			// TODO Get name from directory
-		}
-
 		// Header
 		fmt.Fprintf(&buffer, "# %s\n--\n", document.name)
 
 		if !document.isCommand {
 			// Import
-			if (dotImport != "") {
-				fmt.Fprintf(&buffer, space(4) + "import \"%s\"\n\n", dotImport)
+			if Style.IncludeImport {
+				if (dotImport != "") {
+					fmt.Fprintf(&buffer, space(4) + "import \"%s\"\n\n", dotImport)
+				}
 			}
 		}
 
@@ -222,7 +244,7 @@ func main() {
 			writeVariableSection(&buffer, document.pkg.Vars)
 
 			// Function Section
-			writeFunctionSection(&buffer, "####", document.pkg.Funcs)
+			writeFunctionSection(&buffer, document.pkg.Funcs, false)
 
 			// Type Section
 			writeTypeSection(&buffer, document.pkg.Types)
