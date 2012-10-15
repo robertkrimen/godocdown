@@ -47,6 +47,8 @@ var DefaultStyle = Style{
 	FunctionHeader: "####",
 	TypeHeader: "####",
 	TypeFunctionHeader: "####",
+
+	IncludeSignature: false,
 }
 var RenderStyle = DefaultStyle
 
@@ -63,6 +65,8 @@ type Style struct {
 	FunctionHeader string
 	TypeHeader string
 	TypeFunctionHeader string
+
+	IncludeSignature bool
 }
 
 type _document struct {
@@ -114,6 +118,12 @@ func sourceOfNode(target interface{}) string {
 
 func indent(target string, indent string) string {
 	return indent_Regexp.ReplaceAllString(target, indent + "$1")
+}
+
+func trimSpace(buffer *bytes.Buffer) {
+	tmp := bytes.TrimSpace(buffer.Bytes())
+	buffer.Reset()
+	buffer.Write(tmp)
 }
 
 func loadDocument(path string) (*_document, error) {
@@ -179,12 +189,12 @@ func main() {
 		path = "."
 	}
 
-	document, err := loadDocument(path)
+	RenderStyle.IncludeSignature = *signature_flag
 
+	document, err := loadDocument(path)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 	}
-
 	if document == nil {
 		// Nothing found.
 		rootPath, _ := filepath.Abs(path)
@@ -204,15 +214,17 @@ func main() {
 		if !document.isCommand {
 			renderUsageTo(&buffer, document)
 		}
+
+		trimSpace(&buffer)
+
+		renderSignatureTo(&buffer)
 	}
 
 	if debug {
+		// Skip printing if we're debugging
 		return
 	}
 
-	fmt.Println(strings.TrimSpace(buffer.String()))
-
-	if *signature_flag {
-		fmt.Printf("\n--\n**godocdown** http://github.com/robertkrimen/godocdown\n")
-	}
+	documentation := buffer.String()
+	fmt.Println(documentation)
 }
