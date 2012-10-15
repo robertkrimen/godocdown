@@ -240,6 +240,6 @@ func main() {
 		return
 	}
 
-	documentation := buffer.String()
+	documentation := strings.TrimSpace(buffer.String())
 	fmt.Println(documentation)
 }

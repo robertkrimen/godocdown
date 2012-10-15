@@ -69,4 +69,7 @@ Package example is an example package with documentation
 --
 **godocdown** http://github.com/robertkrimen/godocdown
 	`)
+
+	renderSignatureTo(buffer)
+	Is(buffer.String(), "\n\n--\n**godocdown** http://github.com/robertkrimen/godocdown\n")
 }

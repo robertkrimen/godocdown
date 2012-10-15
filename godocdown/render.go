@@ -83,6 +83,6 @@ func renderUsageTo(writer io.Writer, document *_document) {
 
 func renderSignatureTo(writer io.Writer) {
 	if RenderStyle.IncludeSignature {
-		fmt.Fprintf(writer, "\n--\n**godocdown** http://github.com/robertkrimen/godocdown\n")
+		fmt.Fprintf(writer, "\n\n--\n**godocdown** http://github.com/robertkrimen/godocdown\n")
 	}
 }
