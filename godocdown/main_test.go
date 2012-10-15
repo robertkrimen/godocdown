@@ -25,9 +25,13 @@ a Title Is Without punctuation
 
 	In this mode, a title can be something without punctuation
 
+Also do not title something with a space at the end 
+
 Only Title Casing Is Allowed Here
 
 What it says on the tin above.
+
+1word
 	`
 	is := func(scanner *regexp.Regexp, want string){
 		have := headlineSynopsis(synopsis, "#", scanner)
@@ -42,9 +46,13 @@ a Title Is Without punctuation
 
 	In this mode, a title can be something without punctuation
 
+Also do not title something with a space at the end 
+
 Only Title Casing Is Allowed Here
 
 What it says on the tin above.
+
+# 1word
 	`)
 
 	is(synopsisHeadingTitleCase_Regexp, `
@@ -55,9 +63,13 @@ a Title Is Without punctuation
 
 	In this mode, a title can be something without punctuation
 
+Also do not title something with a space at the end 
+
 # Only Title Casing Is Allowed Here
 
 What it says on the tin above.
+
+1word
 	`)
 
 	is(synopsisHeadingTitle_Regexp, `
@@ -68,9 +80,30 @@ The previous line is a single word.
 
 	In this mode, a title can be something without punctuation
 
+Also do not title something with a space at the end 
+
 # Only Title Casing Is Allowed Here
 
 What it says on the tin above.
+
+# 1word
+	`)
+
+	is(synopsisHeadingTitleCase1Word_Regexp, `
+# Headline
+The previous line is a single word.
+
+a Title Is Without punctuation
+
+	In this mode, a title can be something without punctuation
+
+Also do not title something with a space at the end 
+
+# Only Title Casing Is Allowed Here
+
+What it says on the tin above.
+
+# 1word
 	`)
 }
 

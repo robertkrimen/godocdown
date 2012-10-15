@@ -1,5 +1,5 @@
 /*
-Package example is an example package with documentation
+Package example is an example package with documentation 
 
 	// Here is some code
 	func example() {

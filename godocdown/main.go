@@ -29,9 +29,12 @@ var (
 
 var (
 	fset *token.FileSet
+
 	synopsisHeading1Word_Regexp = regexp.MustCompile("(?m)^([A-Za-z0-9]+)$")
-	synopsisHeadingTitleCase_Regexp = regexp.MustCompile("(?m)^([A-Z][A-Za-z0-9]*\\s*)+$")
-	synopsisHeadingTitle_Regexp = regexp.MustCompile("(?m)^([A-Za-z0-9]+\\s*)+$")
+	synopsisHeadingTitleCase_Regexp = regexp.MustCompile("(?m)^((?:[A-Z][A-Za-z0-9]*)(?:[ \t]+[A-Z][A-Za-z0-9]*)*)$")
+	synopsisHeadingTitle_Regexp = regexp.MustCompile("(?m)^((?:[A-Za-z0-9]+)(?:[ \t]+[A-Za-z0-9]+)*)$")
+	synopsisHeadingTitleCase1Word_Regexp = regexp.MustCompile("(?m)^((?:[A-Za-z0-9]+)|(?:(?:[A-Z][A-Za-z0-9]*)(?:[ \t]+[A-Z][A-Za-z0-9]*)*))$")
+
 	strip_Regexp = regexp.MustCompile("(?m)^\\s*// contains filtered or unexported fields\\s*\n")
 	indent_Regexp = regexp.MustCompile("(?m)^([^\\n])") // Match at least one character at the start of the line
 	synopsisHeading_Regexp = synopsisHeading1Word_Regexp
@@ -41,7 +44,7 @@ var DefaultStyle = Style{
 	IncludeImport: true,
 
 	SynopsisHeader: "###",
-	HeadifySynopsis: true,
+	SynopsisHeadline: synopsisHeadingTitleCase1Word_Regexp,
 
 	UsageHeader: "## Usage\n",
 
@@ -73,7 +76,7 @@ type Style struct {
 	IncludeImport bool
 
 	SynopsisHeader string
-	HeadifySynopsis bool
+	SynopsisHeadline *regexp.Regexp
 
 	UsageHeader string
 
@@ -115,10 +118,11 @@ func indentCode(target string) string {
 }
 
 func headifySynopsis(target string) string {
-	if !RenderStyle.HeadifySynopsis {
+	headline := RenderStyle.SynopsisHeadline
+	if headline == nil {
 		return target
 	}
-	return synopsisHeading_Regexp.ReplaceAllStringFunc(target, func(heading string) string {
+	return headline.ReplaceAllStringFunc(target, func(heading string) string {
 		return fmt.Sprintf("%s %s", RenderStyle.SynopsisHeader, heading)
 	})
 }
