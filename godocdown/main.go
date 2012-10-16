@@ -25,6 +25,7 @@ const (
 var (
 	signature_flag = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
 	plain_flag = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
+	heading_flag = flag.String("heading", "TitleCase1Word", "Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, \"\"")
 )
 
 var (
@@ -44,7 +45,7 @@ var DefaultStyle = Style{
 	IncludeImport: true,
 
 	SynopsisHeader: "###",
-	SynopsisHeadline: synopsisHeadingTitleCase1Word_Regexp,
+	SynopsisHeading: synopsisHeadingTitleCase1Word_Regexp,
 
 	UsageHeader: "## Usage\n",
 
@@ -76,7 +77,7 @@ type Style struct {
 	IncludeImport bool
 
 	SynopsisHeader string
-	SynopsisHeadline *regexp.Regexp
+	SynopsisHeading *regexp.Regexp
 
 	UsageHeader string
 
@@ -118,11 +119,11 @@ func indentCode(target string) string {
 }
 
 func headifySynopsis(target string) string {
-	headline := RenderStyle.SynopsisHeadline
-	if headline == nil {
+	detect := RenderStyle.SynopsisHeading
+	if detect == nil {
 		return target
 	}
-	return headline.ReplaceAllStringFunc(target, func(heading string) string {
+	return detect.ReplaceAllStringFunc(target, func(heading string) string {
 		return fmt.Sprintf("%s %s", RenderStyle.SynopsisHeader, heading)
 	})
 }
@@ -217,6 +218,19 @@ func main() {
 	}
 
 	RenderStyle.IncludeSignature = *signature_flag
+
+	switch *heading_flag {
+	case "1Word":
+		RenderStyle.SynopsisHeading = synopsisHeading1Word_Regexp
+	case "TitleCase":
+		RenderStyle.SynopsisHeading = synopsisHeadingTitleCase_Regexp
+	case "Title":
+		RenderStyle.SynopsisHeading = synopsisHeadingTitle_Regexp
+	case "TitleCase1Word":
+		RenderStyle.SynopsisHeading = synopsisHeadingTitleCase1Word_Regexp
+	case "", "-":
+		RenderStyle.SynopsisHeading = nil
+	}
 
 	document, err := loadDocument(path)
 	if err != nil {
