@@ -32,6 +32,8 @@ Only Title Casing Is Allowed Here
 What it says on the tin above.
 
 1word
+
+A title with a-dash
 	`
 	is := func(scanner *regexp.Regexp, want string){
 		have := headlineSynopsis(synopsis, "#", scanner)
@@ -53,6 +55,8 @@ Only Title Casing Is Allowed Here
 What it says on the tin above.
 
 # 1word
+
+A title with a-dash
 	`)
 
 	is(synopsisHeadingTitleCase_Regexp, `
@@ -70,6 +74,8 @@ Also do not title something with a space at the end
 What it says on the tin above.
 
 1word
+
+A title with a-dash
 	`)
 
 	is(synopsisHeadingTitle_Regexp, `
@@ -87,6 +93,8 @@ Also do not title something with a space at the end
 What it says on the tin above.
 
 # 1word
+
+# A title with a-dash
 	`)
 
 	is(synopsisHeadingTitleCase1Word_Regexp, `
@@ -104,6 +112,8 @@ Also do not title something with a space at the end
 What it says on the tin above.
 
 # 1word
+
+A title with a-dash
 	`)
 }
 

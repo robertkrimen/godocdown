@@ -35,10 +35,10 @@ var (
 var (
 	fset *token.FileSet
 
-	synopsisHeading1Word_Regexp = regexp.MustCompile("(?m)^([A-Za-z0-9]+)$")
-	synopsisHeadingTitleCase_Regexp = regexp.MustCompile("(?m)^((?:[A-Z][A-Za-z0-9]*)(?:[ \t]+[A-Z][A-Za-z0-9]*)*)$")
-	synopsisHeadingTitle_Regexp = regexp.MustCompile("(?m)^((?:[A-Za-z0-9]+)(?:[ \t]+[A-Za-z0-9]+)*)$")
-	synopsisHeadingTitleCase1Word_Regexp = regexp.MustCompile("(?m)^((?:[A-Za-z0-9]+)|(?:(?:[A-Z][A-Za-z0-9]*)(?:[ \t]+[A-Z][A-Za-z0-9]*)*))$")
+	synopsisHeading1Word_Regexp = regexp.MustCompile("(?m)^([A-Za-z0-9_-]+)$")
+	synopsisHeadingTitleCase_Regexp = regexp.MustCompile("(?m)^((?:[A-Z][A-Za-z0-9_-]*)(?:[ \t]+[A-Z][A-Za-z0-9_-]*)*)$")
+	synopsisHeadingTitle_Regexp = regexp.MustCompile("(?m)^((?:[A-Za-z0-9_-]+)(?:[ \t]+[A-Za-z0-9_-]+)*)$")
+	synopsisHeadingTitleCase1Word_Regexp = regexp.MustCompile("(?m)^((?:[A-Za-z0-9_-]+)|(?:(?:[A-Z][A-Za-z0-9_-]*)(?:[ \t]+[A-Z][A-Za-z0-9_-]*)*))$")
 
 	strip_Regexp = regexp.MustCompile("(?m)^\\s*// contains filtered or unexported fields\\s*\n")
 	indent_Regexp = regexp.MustCompile("(?m)^([^\\n])") // Match at least one character at the start of the line
