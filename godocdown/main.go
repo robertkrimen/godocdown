@@ -212,7 +212,19 @@ func loadDocument(path string) (*_document, error) {
 	return nil, nil
 }
 
-func (self *_document) Emit(buffer *bytes.Buffer) {
+func emitString(fn func(*bytes.Buffer)) string {
+	var buffer bytes.Buffer
+	fn(&buffer)
+	return buffer.String()
+}
+
+func (self *_document) Emit() string {
+	return emitString(func(buffer *bytes.Buffer) {
+		self.EmitTo(buffer)
+	})
+}
+
+func (self *_document) EmitTo(buffer *bytes.Buffer) {
 
 	// Header
 	renderHeaderTo(buffer, self)
@@ -228,7 +240,13 @@ func (self *_document) Emit(buffer *bytes.Buffer) {
 	trimSpace(buffer)
 }
 
-func (self *_document) EmitSignature(buffer *bytes.Buffer) {
+func (self *_document) EmitSignature() string {
+	return emitString(func(buffer *bytes.Buffer) {
+		self.EmitSignatureTo(buffer)
+	})
+}
+
+func (self *_document) EmitSignatureTo(buffer *bytes.Buffer) {
 
 	renderSignatureTo(buffer)
 
@@ -252,16 +270,6 @@ func loadTemplate(document *_document, path string) *tmplate.Template {
 	}
 
 	template := tmplate.New("").Funcs(tmplate.FuncMap{
-		"Emit": func() string {
-			var buffer bytes.Buffer
-			document.Emit(&buffer)
-			return buffer.String()
-		},
-		"EmitSignature": func() string {
-			var buffer bytes.Buffer
-			document.EmitSignature(&buffer)
-			return buffer.String()
-		},
 	})
 	template, err := template.ParseFiles(templatePath)
 	if err != nil {
@@ -308,8 +316,8 @@ func main() {
 
 	var buffer bytes.Buffer
 	if template == nil {
-		document.Emit(&buffer)
-		document.EmitSignature(&buffer)
+		document.EmitTo(&buffer)
+		document.EmitSignatureTo(&buffer)
 	} else {
 		err := template.Templates()[0].Execute(&buffer, document)
 		if err != nil {

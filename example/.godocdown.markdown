@@ -1,6 +1,6 @@
-{{ Emit }}
+{{ .Emit }}
 
-{{ EmitSignature }}
+{{ .EmitSignature }}
 
 --
 This was via template
