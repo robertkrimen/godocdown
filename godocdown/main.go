@@ -93,10 +93,10 @@ type Style struct {
 }
 
 type _document struct {
-	name string
+	Name string
 	pkg *doc.Package
-	isCommand bool
-	dotImport string
+	IsCommand bool
+	DotImport string
 }
 
 func _formatIndent(target, indent, preIndent string) string {
@@ -200,10 +200,10 @@ func loadDocument(path string) (*_document, error) {
 		}
 
 		document := &_document{
-			name: name,
+			Name: name,
 			pkg: pkg,
-			isCommand: isCommand,
-			dotImport: dotImport,
+			IsCommand: isCommand,
+			DotImport: dotImport,
 		}
 
 		return document, nil
@@ -215,9 +215,11 @@ func loadDocument(path string) (*_document, error) {
 func emitString(fn func(*bytes.Buffer)) string {
 	var buffer bytes.Buffer
 	fn(&buffer)
+	trimSpace(&buffer)
 	return buffer.String()
 }
 
+// Emit
 func (self *_document) Emit() string {
 	return emitString(func(buffer *bytes.Buffer) {
 		self.EmitTo(buffer)
@@ -227,19 +229,20 @@ func (self *_document) Emit() string {
 func (self *_document) EmitTo(buffer *bytes.Buffer) {
 
 	// Header
-	renderHeaderTo(buffer, self)
+	self.EmitHeaderTo(buffer)
 
 	// Synopsis
-	renderSynopsisTo(buffer, self)
+	self.EmitSynopsisTo(buffer)
 
 	// Usage
-	if !self.isCommand {
-		renderUsageTo(buffer, self)
+	if !self.IsCommand {
+		self.EmitUsageTo(buffer)
 	}
 
 	trimSpace(buffer)
 }
 
+// Signature
 func (self *_document) EmitSignature() string {
 	return emitString(func(buffer *bytes.Buffer) {
 		self.EmitSignatureTo(buffer)
@@ -251,6 +254,39 @@ func (self *_document) EmitSignatureTo(buffer *bytes.Buffer) {
 	renderSignatureTo(buffer)
 
 	trimSpace(buffer)
+}
+
+// Header
+func (self *_document) EmitHeader() string {
+	return emitString(func(buffer *bytes.Buffer) {
+		self.EmitHeaderTo(buffer)
+	})
+}
+
+func (self *_document) EmitHeaderTo(buffer *bytes.Buffer) {
+	renderHeaderTo(buffer, self)
+}
+
+// Synopsis
+func (self *_document) EmitSynopsis() string {
+	return emitString(func(buffer *bytes.Buffer) {
+		self.EmitSynopsisTo(buffer)
+	})
+}
+
+func (self *_document) EmitSynopsisTo(buffer *bytes.Buffer) {
+	renderSynopsisTo(buffer, self)
+}
+
+// Usage
+func (self *_document) EmitUsage() string {
+	return emitString(func(buffer *bytes.Buffer) {
+		self.EmitUsageTo(buffer)
+	})
+}
+
+func (self *_document) EmitUsageTo(buffer *bytes.Buffer) {
+	renderUsageTo(buffer, self)
 }
 
 func loadTemplate(document *_document, path string) *tmplate.Template {

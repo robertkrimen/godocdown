@@ -48,13 +48,13 @@ func renderTypeSectionTo(writer io.Writer, list []*doc.Type) {
 }
 
 func renderHeaderTo(writer io.Writer, document *_document) {
-	fmt.Fprintf(writer, "# %s\n--\n", document.name)
+	fmt.Fprintf(writer, "# %s\n--\n", document.Name)
 
-	if !document.isCommand {
+	if !document.IsCommand {
 		// Import
 		if RenderStyle.IncludeImport {
-			if (document.dotImport != "") {
-				fmt.Fprintf(writer, space(4) + "import \"%s\"\n\n", document.dotImport)
+			if (document.DotImport != "") {
+				fmt.Fprintf(writer, space(4) + "import \"%s\"\n\n", document.DotImport)
 			}
 		}
 	}
