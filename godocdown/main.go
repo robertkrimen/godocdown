@@ -14,7 +14,7 @@ import (
 	"regexp"
 	"path/filepath"
 	tme "time"
-	"text/template"
+	tmplate "text/template"
 )
 
 const (
@@ -211,7 +211,30 @@ func loadDocument(path string) (*_document, error) {
 	return nil, nil
 }
 
-func loadTemplate(path string) *template.Template {
+func (self *_document) Emit(buffer *bytes.Buffer) {
+
+	// Header
+	renderHeaderTo(buffer, self)
+
+	// Synopsis
+	renderSynopsisTo(buffer, self)
+
+	// Usage
+	if !self.isCommand {
+		renderUsageTo(buffer, self)
+	}
+
+	trimSpace(buffer)
+}
+
+func (self *_document) EmitSignature(buffer *bytes.Buffer) {
+
+	renderSignatureTo(buffer)
+
+	trimSpace(buffer)
+}
+
+func loadTemplate(document *_document, path string) *tmplate.Template {
 	templatePath := filepath.Join(path, ".godocdown.markdown")
 	{
 		_, err := os.Stat(templatePath)
@@ -223,6 +246,18 @@ func loadTemplate(path string) *template.Template {
 		}
 	}
 
+	template := tmplate.New("").Funcs(tmplate.FuncMap{
+		"Emit": func() string {
+			var buffer bytes.Buffer
+			document.Emit(&buffer)
+			return buffer.String()
+		},
+		"EmitSignature": func() string {
+			var buffer bytes.Buffer
+			document.EmitSignature(&buffer)
+			return buffer.String()
+		},
+	})
 	template, err := template.ParseFiles(templatePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing template \"%s\": %v", templatePath, err)
@@ -264,26 +299,14 @@ func main() {
 		os.Exit(64)
 	}
 
-	template := loadTemplate(path)
+	template := loadTemplate(document, path)
 
 	var buffer bytes.Buffer
 	if template == nil {
-		// Header
-		renderHeaderTo(&buffer, document)
-
-		// Synopsis
-		renderSynopsisTo(&buffer, document)
-
-		// Usage
-		if !document.isCommand {
-			renderUsageTo(&buffer, document)
-		}
-
-		trimSpace(&buffer)
-
-		renderSignatureTo(&buffer)
+		document.Emit(&buffer)
+		document.EmitSignature(&buffer)
 	} else {
-		err := template.Execute(&buffer, document)
+		err := template.Templates()[0].Execute(&buffer, document)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error running template: %v", err)
 			os.Exit(64)
@@ -295,6 +318,7 @@ func main() {
 		return
 	}
 
-	documentation := strings.TrimSpace(buffer.String())
+	documentation := buffer.String()
+	documentation = strings.TrimSpace(documentation)
 	fmt.Println(documentation)
 }

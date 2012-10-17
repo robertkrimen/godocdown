@@ -22,7 +22,7 @@ run-help:
 	cd godocdown && go run main.go render.go -help
 
 run-example:
-	cd godocdown && go run main.go render.go ../$(TEST)
+	cd godocdown && go run main.go render.go --signature ../$(TEST)
 
 install:
 	go install ./godocdown
