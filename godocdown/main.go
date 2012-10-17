@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"path/filepath"
 	tme "time"
+	"text/template"
 )
 
 const (
@@ -210,6 +211,26 @@ func loadDocument(path string) (*_document, error) {
 	return nil, nil
 }
 
+func loadTemplate(path string) *template.Template {
+	templatePath := filepath.Join(path, ".godocdown.markdown")
+	{
+		_, err := os.Stat(templatePath)
+		if err != nil {
+			if os.IsExist(err) {
+				return nil
+			}
+			return nil // Other error reporting?
+		}
+	}
+
+	template, err := template.ParseFiles(templatePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing template \"%s\": %v", templatePath, err)
+		os.Exit(64)
+	}
+	return template
+}
+
 func main() {
 	flag.Parse()
 	path := flag.Arg(0)
@@ -243,8 +264,10 @@ func main() {
 		os.Exit(64)
 	}
 
+	template := loadTemplate(path)
+
 	var buffer bytes.Buffer
-	{
+	if template == nil {
 		// Header
 		renderHeaderTo(&buffer, document)
 
@@ -259,6 +282,12 @@ func main() {
 		trimSpace(&buffer)
 
 		renderSignatureTo(&buffer)
+	} else {
+		err := template.Execute(&buffer, document)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error running template: %v", err)
+			os.Exit(64)
+		}
 	}
 
 	if debug {
