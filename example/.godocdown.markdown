@@ -1,3 +1,6 @@
 {{ Emit }}
 
 {{ EmitSignature }}
+
+--
+This was via template
