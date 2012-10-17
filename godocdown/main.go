@@ -27,7 +27,9 @@ var (
 	signature_flag = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
 	plain_flag = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
 	heading_flag = flag.String("heading", "TitleCase1Word", "Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, \"\"")
-	template_flag = flag.Bool("template", true, "Try and render via template if a .godocdown.markdown template file is detected")
+	// TODO Make this work
+	//template_flag = flag.String("template", "*", "The template filename/pattern to look for when rendering via template")
+	no_template_flag = flag.Bool("no-template", false, "Disable template processing")
 )
 
 var (
@@ -290,7 +292,7 @@ func (self *_document) EmitUsageTo(buffer *bytes.Buffer) {
 }
 
 func loadTemplate(document *_document, path string) *tmplate.Template {
-	if !*template_flag {
+	if *no_template_flag {
 		return nil
 	}
 
