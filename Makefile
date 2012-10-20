@@ -12,11 +12,12 @@ build:
 	cd godocdown && go build -o ../$(RUN)
 
 test-example: build
-	$(RUN) --signature example > test/README.markdown
+	$(RUN) -signature example > test/README.markdown
 	cd test && git commit -m 'WIP' * && git push
 
 release: build
 	$(RUN) $(HOME)/go/src/pkg/strings > example.markdown
+	$(RUN) ./godocdown -signature > README.markdown
 
 run-help:
 	cd godocdown && go run main.go render.go -help

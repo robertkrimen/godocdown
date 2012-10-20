@@ -1,5 +1,4 @@
-# godocdown
---
+/*
 Command godocdown extracts and generates Go documentation in a GitHub-friendly Markdown format.
 
 This program is targeted at providing nice-looking documentation for GitHub. With this in
@@ -14,17 +13,17 @@ default. This can be changed with the use of the "plain" flag to generate standa
 	$ godocdown > README.markdown
 
 	# Generate standard Markdown
-	$ godocdown -plain .
+	$ godocdown -plain . 
 
-### Installation
+Installation
 
 	go get github.com/robertkrimen/godocdown/godocdown
 
-### Example
+Example
 
 	http://github.com/robertkrimen/godocdown/blob/master/example.markdown
 
-### Usage
+Usage
 
 The following options are accepted:
 
@@ -36,3 +35,6 @@ The following options are accepted:
 
 	-plain=false
 	# Emit standard Markdown, rather than Github Flavored Markdown (the default)
+
+*/
+package documentation
