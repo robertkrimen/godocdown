@@ -1,3 +1,4 @@
+/Users/rob/go/src/pkg/strings <nil>
 # strings
 --
 Package strings implements simple functions to manipulate strings.
