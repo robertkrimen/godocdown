@@ -21,20 +21,20 @@ Installation
 
 Example
 
-	http://github.com/robertkrimen/godocdown/blob/master/example.markdown
+http://github.com/robertkrimen/godocdown/blob/master/example.markdown
 
 Usage
 
 The following options are accepted:
 
 	-heading="TitleCase1Word"
-	# Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
+	Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
 
 	-no-template=false
-	# Disable template processing
+	Disable template processing
 
 	-plain=false
-	# Emit standard Markdown, rather than Github Flavored Markdown (the default)
+	Emit standard Markdown, rather than Github Flavored Markdown (the default)
 
 */
 package documentation
