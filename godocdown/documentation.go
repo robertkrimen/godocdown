@@ -83,7 +83,10 @@ In addition to the standard template functionality, the starting data argument h
 	// A boolean indicating whether the given package is a command or a plain package
 
 	.Name
-	// A string containing the name of the package/command
+	// The name of the package/command (string)
+
+	.ImportPath
+	// The import path for the package (string)
 
 */
 package documentation

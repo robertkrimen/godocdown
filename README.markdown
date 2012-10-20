@@ -1,4 +1,3 @@
-/Users/rob/go.3rdparty/src/github.com/robertkrimen/godocdown/godocdown <nil>
 # godocdown
 --
 Command godocdown extracts and generates Go documentation in a GitHub-friendly Markdown format.
@@ -85,7 +84,10 @@ In addition to the standard template functionality, the starting data argument h
 	// A boolean indicating whether the given package is a command or a plain package
 
 	.Name
-	// A string containing the name of the package/command
+	// The name of the package/command (string)
+
+	.ImportPath
+	// The import path for the package (string)
 
 --
 **godocdown** http://github.com/robertkrimen/godocdown
