@@ -8,6 +8,16 @@ import (
 	. "github.com/robertkrimen/terst"
 )
 
+func TestGuessImportPath(t *testing.T) {
+	Terst(t)
+
+	Is(guessImportPath("./example"), "github.com/robertkrimen/godocdown/godocdown/example")
+	Is(guessImportPath("example"), "github.com/robertkrimen/godocdown/godocdown/example")
+	Is(guessImportPath("/not/in/GOPATH"), "")
+	Is(guessImportPath("in/GOPATH"), "github.com/robertkrimen/godocdown/godocdown/in/GOPATH")
+	Is(guessImportPath("../example/example"), "github.com/robertkrimen/godocdown/example")
+}
+
 func TestIndent(t *testing.T) {
 	Terst(t)
 

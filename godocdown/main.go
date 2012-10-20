@@ -158,9 +158,32 @@ func trimSpace(buffer *bytes.Buffer) {
 	buffer.Write(tmp)
 }
 
+func guessImportPath(path string) string {
+	GOPATH := os.ExpandEnv("$GOPATH")
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return ""
+	}
+	_, err = os.Lstat(path);
+	fmt.Println(path, err)
+	if _, err := os.Lstat(path); err == nil {
+		// Follow symbolic lik
+		path, err = filepath.EvalSymlinks(path)
+		if err != nil {
+			return ""
+		}
+	}
+	for _, GOPATH := range strings.Split(GOPATH, ":") {
+		if strings.HasPrefix(path, GOPATH) {
+			return path[len(GOPATH) + len("/src/"):]
+		}
+	}
+	return ""
+}
+
 func loadDocument(path string) (*_document, error) {
 	fset = token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, path, func(file os.FileInfo) bool {
+	pkgSet, err := parser.ParseDir(fset, path, func(file os.FileInfo) bool {
 		name := file.Name()
 		if name[0] != '.' && strings.HasSuffix(name, ".go") && !strings.HasSuffix(name, "_test.go") {
 			return true
@@ -172,11 +195,11 @@ func loadDocument(path string) (*_document, error) {
 	}
 
 	dotImport := ""
-	if read, err := ioutil.ReadFile(filepath.Join(path, ".import")); err == nil {
+	if read, err := ioutil.ReadFile(filepath.Join(path, ".godocdown.import")); err == nil {
 		dotImport = strings.TrimSpace(strings.Split(string(read), "\n")[0])
 	}
 
-	for _, pkg := range pkgs {
+	for _, pkg := range pkgSet {
 		isCommand := false
 		name := ""
 		pkg := doc.New(pkg, ".", 0)
