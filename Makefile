@@ -15,7 +15,7 @@ test-example: build
 	$(RUN) -signature example > test/README.markdown
 	cd test && git commit -m 'WIP' * && git push
 
-release: build
+release: test build 
 	$(RUN) $(HOME)/go/src/pkg/strings > example.markdown
 	$(RUN) -signature ./godocdown > README.markdown
 

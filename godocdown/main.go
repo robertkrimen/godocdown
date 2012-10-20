@@ -194,9 +194,9 @@ func loadDocument(path string) (*_document, error) {
 		return nil, fmt.Errorf("Could not parse \"%s\": %v", path, err)
 	}
 
-	dotImport := ""
+	ImportPath := ""
 	if read, err := ioutil.ReadFile(filepath.Join(path, ".godocdown.import")); err == nil {
-		dotImport = strings.TrimSpace(strings.Split(string(read), "\n")[0])
+		ImportPath = strings.TrimSpace(strings.Split(string(read), "\n")[0])
 	}
 
 	for _, pkg := range pkgSet {
@@ -228,7 +228,7 @@ func loadDocument(path string) (*_document, error) {
 			Name: name,
 			pkg: pkg,
 			IsCommand: isCommand,
-			DotImport: dotImport,
+			DotImport: ImportPath,
 		}
 
 		return document, nil
