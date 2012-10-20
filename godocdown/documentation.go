@@ -28,34 +28,33 @@ Usage
 The following options are accepted:
 
 	-heading="TitleCase1Word"
-	// Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
-	// For each line of the package declaration, godocdown attempts to detect if
-	// a heading is present via a pattern match. If a heading is detected,
-	// it prefixes the line with a Markdown heading indicator (typically "###").
+		Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
+		For each line of the package declaration, godocdown attempts to detect if
+		a heading is present via a pattern match. If a heading is detected,
+		it prefixes the line with a Markdown heading indicator (typically "###").
 
-		1Word: Only a single word on the entire line
-			[A-Za-z0-9_-]+
+			1Word: Only a single word on the entire line
+				[A-Za-z0-9_-]+
 
-		TitleCase: A line where each word has the first letter capitalized
-			([A-Z][A-Za-z0-9_-]\s*)+
+			TitleCase: A line where each word has the first letter capitalized
+				([A-Z][A-Za-z0-9_-]\s*)+
 
-		Title: A line without punctuation (e.g. a period at the end)
-			([A-Za-z0-9_-]\s*)+
+			Title: A line without punctuation (e.g. a period at the end)
+				([A-Za-z0-9_-]\s*)+
 
-		TitleCase1Word: The line matches either the TitleCase or 1Word pattern
+			TitleCase1Word: The line matches either the TitleCase or 1Word pattern
 
 	-no-template=false
-	// Disable template processing
+		Disable template processing
 
 	-plain=false
-	// Emit standard Markdown, rather than Github Flavored Markdown
+		Emit standard Markdown, rather than Github Flavored Markdown
 
 Templating
 
 In addition to Markdown rendering, godocdown provides templating via text/template (http://golang.org/pkg/text/template/)
-for further customization. By putting a file named ".godocdown.template" in the same directory as your
-package/command, godocdown will know to use the file as a template. The following names are also accepted,
-with the first one encountered being used:
+for further customization. By putting a file named ".godocdown.template" (or one from the list below) in the same directory as your
+package/command, godocdown will know to use the file as a template.
 
 	# text/template
 	.godocdown.markdown
