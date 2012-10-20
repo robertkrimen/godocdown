@@ -34,7 +34,7 @@ The following options are accepted:
 	// Disable template processing
 
 	-plain=false
-	// Emit standard Markdown, rather than Github Flavored Markdown (the default)
+	// Emit standard Markdown, rather than Github Flavored Markdown
 
 Templating
 
@@ -52,18 +52,18 @@ with the first one encountered being used:
 In addition to the standard template functionality, the starting data argument has the following interface:
 
 	.Emit
-	// A method emitting all of the rendered documentation
+	// A method for emitting the standard documentation (what godocdown would emit without a template)
 
 	.EmitHeader
-	// A method emitting the package/command name and an import line (if one is present/needed)
+	// A method for emitting the package name and an import line (if one is present/needed)
 
 	.EmitSynopsis
-	// A method emitting the package/command declaration
+	// A method for emitting the package declaration
 
 	.EmitUsage
-	// A method emitting package usage, include a constant section, a variable section,
-	// the function section, and a type section (and each type having its own constant, variable,
-	// and function/method listing)
+	// A method for emitting package usage, which includes a constants section, a variables section,
+	// a functions section, and a types section. In addition, each type may have its own constant,
+	// variable, and/or function/method listing.
 
 	.IsCommand
 	// A boolean indicating whether the given package is a command or a plain package
