@@ -62,7 +62,7 @@ package/command, godocdown will know to use the file as a template.
 	.godocdown.template
 	.godocdown.tmpl
 
-In addition to the standard template functionality, the starting data argument has the following interface:
+Along with the standard template functionality, the starting data argument has the following interface:
 
 	.Emit
 	// A method for emitting the standard documentation (what godocdown would emit without a template)
