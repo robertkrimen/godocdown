@@ -165,7 +165,6 @@ func guessImportPath(path string) string {
 		return ""
 	}
 	_, err = os.Lstat(path);
-	fmt.Println(path, err)
 	if _, err := os.Lstat(path); err == nil {
 		// Follow symbolic lik
 		path, err = filepath.EvalSymlinks(path)
