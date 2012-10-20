@@ -174,7 +174,7 @@ func guessImportPath(path string) string {
 	}
 	for _, GOPATH := range strings.Split(GOPATH, ":") {
 		if strings.HasPrefix(path, GOPATH) {
-			return path[len(GOPATH) + len("/src/"):]
+			return filepath.ToSlash(path[len(GOPATH) + len(filepath.FromSlash("/src/")):])
 		}
 	}
 	return ""
