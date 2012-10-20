@@ -17,7 +17,7 @@ test-example: build
 
 release: build
 	$(RUN) $(HOME)/go/src/pkg/strings > example.markdown
-	$(RUN) ./godocdown -signature > README.markdown
+	$(RUN) -signature ./godocdown > README.markdown
 
 run-help:
 	cd godocdown && go run main.go render.go -help

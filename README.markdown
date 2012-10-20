@@ -36,3 +36,6 @@ The following options are accepted:
 
 	-plain=false
 	# Emit standard Markdown, rather than Github Flavored Markdown (the default)
+
+--
+**godocdown** http://github.com/robertkrimen/godocdown
