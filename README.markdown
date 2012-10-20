@@ -2,10 +2,6 @@
 --
 Command godocdown extracts and generates Go documentation in a GitHub-friendly Markdown format.
 
-This program is targeted at providing nice-looking documentation for GitHub. With this in
-mind, it generates GitHub Flavored Markdown (http://github.github.com/github-flavored-markdown/) by
-default. This can be changed with the use of the "plain" flag to generate standard Markdown.
-
 	$ go get github.com/robertkrimen/godocdown/godocdown
 
 	$ godocdown /path/to/package > README.markdown
@@ -15,6 +11,10 @@ default. This can be changed with the use of the "plain" flag to generate standa
 
 	# Generate standard Markdown
 	$ godocdown -plain .
+
+This program is targeted at providing nice-looking documentation for GitHub. With this in
+mind, it generates GitHub Flavored Markdown (http://github.github.com/github-flavored-markdown/) by
+default. This can be changed with the use of the "plain" flag to generate standard Markdown.
 
 ### Installation
 
@@ -30,12 +30,26 @@ The following options are accepted:
 
 	-heading="TitleCase1Word"
 	// Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
+	// For each line of the package declaration, godocdown attempts to detect if
+	// a heading is present via a pattern match. If a heading is detected,
+	// it prefixes the line with a Markdown heading indicator (typically "###").
+
+		1Word: Only a single word on the entire line
+			[A-Za-z0-9_-]+
+
+		TitleCase: A line where each word has the first letter capitalized
+			([A-Z][A-Za-z0-9_-]\s*)+
+
+		Title: A line without punctuation (e.g. a period at the end)
+			([A-Za-z0-9_-]\s*)+
+
+		TitleCase1Word: The line matches either the TitleCase or 1Word pattern
 
 	-no-template=false
 	// Disable template processing
 
 	-plain=false
-	// Emit standard Markdown, rather than Github Flavored Markdown (the default)
+	// Emit standard Markdown, rather than Github Flavored Markdown
 
 ### Templating
 
@@ -53,18 +67,18 @@ with the first one encountered being used:
 In addition to the standard template functionality, the starting data argument has the following interface:
 
 	.Emit
-	// A method emitting all of the rendered documentation
+	// A method for emitting the standard documentation (what godocdown would emit without a template)
 
 	.EmitHeader
-	// A method emitting the package/command name and an import line (if one is present/needed)
+	// A method for emitting the package name and an import line (if one is present/needed)
 
 	.EmitSynopsis
-	// A method emitting the package/command declaration
+	// A method for emitting the package declaration
 
 	.EmitUsage
-	// A method emitting package usage, include a constant section, a variable section,
-	// the function section, and a type section (and each type having its own constant, variable,
-	// and function/method listing)
+	// A method for emitting package usage, which includes a constants section, a variables section,
+	// a functions section, and a types section. In addition, each type may have its own constant,
+	// variable, and/or function/method listing.
 
 	.IsCommand
 	// A boolean indicating whether the given package is a command or a plain package
