@@ -53,8 +53,8 @@ func renderHeaderTo(writer io.Writer, document *_document) {
 	if !document.IsCommand {
 		// Import
 		if RenderStyle.IncludeImport {
-			if (document.DotImport != "") {
-				fmt.Fprintf(writer, space(4) + "import \"%s\"\n\n", document.DotImport)
+			if (document.ImportPath != "") {
+				fmt.Fprintf(writer, space(4) + "import \"%s\"\n\n", document.ImportPath)
 			}
 		}
 	}

@@ -98,7 +98,7 @@ type _document struct {
 	Name string
 	pkg *doc.Package
 	IsCommand bool
-	DotImport string
+	ImportPath string
 }
 
 func _formatIndent(target, indent, preIndent string) string {
@@ -228,7 +228,7 @@ func loadDocument(path string) (*_document, error) {
 			Name: name,
 			pkg: pkg,
 			IsCommand: isCommand,
-			DotImport: ImportPath,
+			ImportPath: ImportPath,
 		}
 
 		return document, nil
