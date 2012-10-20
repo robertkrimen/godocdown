@@ -315,20 +315,38 @@ func (self *_document) EmitUsageTo(buffer *bytes.Buffer) {
 	renderUsageTo(buffer, self)
 }
 
+var templateNameList = strings.Fields(`
+	.godocdown.markdown
+	.godocdown.md
+	.godocdown.template
+	.godocdown.tmpl
+`)
+
+func findTemplate(path string) string {
+
+	for _, templateName := range templateNameList {
+		templatePath := filepath.Join(path, templateName)
+		_, err := os.Stat(templatePath)
+		if err != nil {
+			if os.IsExist(err) {
+				continue
+			}
+			continue // Other error reporting?
+		}
+		return templatePath
+	}
+	return "" // Nothing found
+}
+
+
 func loadTemplate(document *_document, path string) *tmplate.Template {
 	if *no_template_flag {
 		return nil
 	}
 
-	templatePath := filepath.Join(path, ".godocdown.markdown")
-	{
-		_, err := os.Stat(templatePath)
-		if err != nil {
-			if os.IsExist(err) {
-				return nil
-			}
-			return nil // Other error reporting?
-		}
+	templatePath := findTemplate(path)
+	if templatePath == "" {
+		return nil
 	}
 
 	template := tmplate.New("").Funcs(tmplate.FuncMap{

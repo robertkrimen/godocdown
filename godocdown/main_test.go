@@ -6,16 +6,29 @@ import (
 	"testing"
 	"regexp"
 	. "github.com/robertkrimen/terst"
+	"path/filepath"
 )
+
+func PATH(path string) string {
+	return filepath.FromSlash(path)
+}
 
 func TestGuessImportPath(t *testing.T) {
 	Terst(t)
 
-	Is(guessImportPath("./example"), "github.com/robertkrimen/godocdown/godocdown/example")
-	Is(guessImportPath("example"), "github.com/robertkrimen/godocdown/godocdown/example")
-	Is(guessImportPath("/not/in/GOPATH"), "")
-	Is(guessImportPath("in/GOPATH"), "github.com/robertkrimen/godocdown/godocdown/in/GOPATH")
-	Is(guessImportPath("../example/example"), "github.com/robertkrimen/godocdown/example")
+	Is(guessImportPath(PATH("./example")), "github.com/robertkrimen/godocdown/godocdown/example")
+	Is(guessImportPath(PATH("example")), "github.com/robertkrimen/godocdown/godocdown/example")
+	Is(guessImportPath(PATH("/not/in/GOPATH")), "")
+	Is(guessImportPath(PATH("in/GOPATH")), "github.com/robertkrimen/godocdown/godocdown/in/GOPATH")
+	Is(guessImportPath(PATH("../example/example")), "github.com/robertkrimen/godocdown/example")
+}
+
+func TestFindTemplate(t *testing.T) {
+	Terst(t)
+	Is(findTemplate(PATH("../.test/godocdown.template")), PATH("../.test/godocdown.template/.godocdown.template"))
+	Is(findTemplate(PATH("../.test/godocdown.tmpl")), PATH("../.test/godocdown.tmpl/.godocdown.tmpl"))
+	Is(findTemplate(PATH("../.test/godocdown.md")), PATH("../.test/godocdown.md/.godocdown.md"))
+	Is(findTemplate(PATH("../.test/godocdown.markdown")), PATH("../.test/godocdown.markdown/.godocdown.markdown"))
 }
 
 func TestIndent(t *testing.T) {
