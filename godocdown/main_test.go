@@ -6,29 +6,24 @@ import (
 	"testing"
 	"regexp"
 	. "github.com/robertkrimen/terst"
-	"path/filepath"
 )
-
-func PATH(path string) string {
-	return filepath.FromSlash(path)
-}
 
 func TestGuessImportPath(t *testing.T) {
 	Terst(t)
 
-	Is(guessImportPath(PATH("./example")), "github.com/robertkrimen/godocdown/godocdown/example")
-	Is(guessImportPath(PATH("example")), "github.com/robertkrimen/godocdown/godocdown/example")
-	Is(guessImportPath(PATH("/not/in/GOPATH")), "")
-	Is(guessImportPath(PATH("in/GOPATH")), "github.com/robertkrimen/godocdown/godocdown/in/GOPATH")
-	Is(guessImportPath(PATH("../example/example")), "github.com/robertkrimen/godocdown/example")
+	Is(guessImportPath(fromSlash("./example")), "github.com/robertkrimen/godocdown/godocdown/example")
+	Is(guessImportPath(fromSlash("example")), "github.com/robertkrimen/godocdown/godocdown/example")
+	Is(guessImportPath(fromSlash("/not/in/GOfromSlash")), "")
+	Is(guessImportPath(fromSlash("in/GOfromSlash")), "github.com/robertkrimen/godocdown/godocdown/in/GOfromSlash")
+	Is(guessImportPath(fromSlash("../example/example")), "github.com/robertkrimen/godocdown/example")
 }
 
 func TestFindTemplate(t *testing.T) {
 	Terst(t)
-	Is(findTemplate(PATH("../.test/godocdown.template")), PATH("../.test/godocdown.template/.godocdown.template"))
-	Is(findTemplate(PATH("../.test/godocdown.tmpl")), PATH("../.test/godocdown.tmpl/.godocdown.tmpl"))
-	Is(findTemplate(PATH("../.test/godocdown.md")), PATH("../.test/godocdown.md/.godocdown.md"))
-	Is(findTemplate(PATH("../.test/godocdown.markdown")), PATH("../.test/godocdown.markdown/.godocdown.markdown"))
+	Is(findTemplate(fromSlash("../.test/godocdown.template")), fromSlash("../.test/godocdown.template/.godocdown.template"))
+	Is(findTemplate(fromSlash("../.test/godocdown.tmpl")), fromSlash("../.test/godocdown.tmpl/.godocdown.tmpl"))
+	Is(findTemplate(fromSlash("../.test/godocdown.md")), fromSlash("../.test/godocdown.md/.godocdown.md"))
+	Is(findTemplate(fromSlash("../.test/godocdown.markdown")), fromSlash("../.test/godocdown.markdown/.godocdown.markdown"))
 }
 
 func TestIndent(t *testing.T) {

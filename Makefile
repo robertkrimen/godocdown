@@ -6,7 +6,7 @@ TEST := ./example
 export TERST_BASE=$(PWD)
 
 test:
-	go test -i ./godocdown &&  go test ./godocdown
+	go test -i ./godocdown &&  go test -v ./godocdown
 
 build:
 	cd godocdown && go build -o ../$(RUN)

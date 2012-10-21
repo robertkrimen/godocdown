@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	tme "time"
 	tmplate "text/template"
+	"runtime"
 )
 
 const (
@@ -158,6 +159,10 @@ func trimSpace(buffer *bytes.Buffer) {
 	buffer.Write(tmp)
 }
 
+func fromSlash(path string) string {
+	return filepath.FromSlash(path)
+}
+
 func guessImportPath(path string) string {
 	GOPATH := os.ExpandEnv("$GOPATH")
 	path, err := filepath.Abs(path)
@@ -172,9 +177,14 @@ func guessImportPath(path string) string {
 			return ""
 		}
 	}
-	for _, GOPATH := range strings.Split(GOPATH, ":") {
-		if strings.HasPrefix(path, GOPATH) {
-			return filepath.ToSlash(path[len(GOPATH) + len(filepath.FromSlash("/src/")):])
+	for _, pkgPath := range append([]string{filepath.Join(runtime.GOROOT(), "src")}, strings.Split(GOPATH, ":")...) {
+		if pkgPath == "" {
+			continue
+		}
+		if strings.HasPrefix(path, pkgPath) {
+			// Actually, either /src/ (GOPATH) or /pkg/ (GOROOT), but
+			// they're the same length, so it won't matter
+			return filepath.ToSlash(path[len(pkgPath) + len(fromSlash("/src/")):])
 		}
 	}
 	return ""
