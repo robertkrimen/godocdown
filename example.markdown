@@ -1,5 +1,7 @@
 # strings
 --
+    import "strings"
+
 Package strings implements simple functions to manipulate strings.
 
 ## Usage

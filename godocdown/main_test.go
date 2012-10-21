@@ -8,14 +8,28 @@ import (
 	. "github.com/robertkrimen/terst"
 )
 
+func canTestImport() bool {
+	have := guessImportPath("example")
+	return len(have) > 0
+}
+
+func testImportPath(target, want string) {
+	have := guessImportPath(fromSlash(target))
+	if have == "" {
+		// Probably in a non-standard location, skip the test
+		return
+	}
+	Is(have, want)
+}
+
 func TestGuessImportPath(t *testing.T) {
 	Terst(t)
 
-	Is(guessImportPath(fromSlash("./example")), "github.com/robertkrimen/godocdown/godocdown/example")
-	Is(guessImportPath(fromSlash("example")), "github.com/robertkrimen/godocdown/godocdown/example")
-	Is(guessImportPath(fromSlash("/not/in/GOfromSlash")), "")
-	Is(guessImportPath(fromSlash("in/GOfromSlash")), "github.com/robertkrimen/godocdown/godocdown/in/GOfromSlash")
-	Is(guessImportPath(fromSlash("../example/example")), "github.com/robertkrimen/godocdown/example")
+	testImportPath("./example", "github.com/robertkrimen/godocdown/godocdown/example")
+	testImportPath("example", "github.com/robertkrimen/godocdown/godocdown/example")
+	testImportPath("/not/in/GOfromSlash", "")
+	testImportPath("in/GOfromSlash", "github.com/robertkrimen/godocdown/godocdown/in/GOfromSlash")
+	testImportPath("../example/example", "github.com/robertkrimen/godocdown/example")
 }
 
 func TestFindTemplate(t *testing.T) {
@@ -155,11 +169,18 @@ func Test(t *testing.T) {
 	}
 
 	renderHeaderTo(buffer, document)
-	is(`
+	if canTestImport() {
+		is(`
 # example
 --
     import "github.com/robertkrimen/godocdown/example"
-	`)
+		`)
+	} else {
+		is(`
+# example
+--
+		`)
+	}
 
 	RenderStyle.IncludeImport = false
 	renderHeaderTo(buffer, document)
