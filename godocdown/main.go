@@ -165,23 +165,19 @@ func fromSlash(path string) string {
 	return filepath.FromSlash(path)
 }
 
-func findPackagePath(target string) (string, bool) {
-	if build.IsLocalImport(target) {
-		// Just assume that target is the path
-		return target, true
+func buildImport(target string) (buildPkg *build.Package) {
+	if filepath.IsAbs(target) {
+		buildPkg, _ = build.Default.ImportDir(target, build.FindOnly)
+		return
 	}
-	return "", false
-}
-
-func buildImport(target string) *build.Package {
 	path, _ := filepath.Abs(".")
-	buildPkg, _ := build.Default.Import(target, path, build.FindOnly)
-	return buildPkg
+	buildPkg, _ = build.Default.Import(target, path, build.FindOnly)
+	return
 }
 
 func guessImportPath(target string) string {
 	buildPkg := buildImport(target)
-	if buildPkg.Dir == "" {
+	if buildPkg.SrcRoot == "" {
 		return ""
 	}
 	return buildPkg.ImportPath
