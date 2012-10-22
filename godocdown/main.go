@@ -6,6 +6,7 @@ import (
 	"go/doc"
 	"go/parser"
 	"go/token"
+	"go/build"
 	"go/printer"
 	"os"
 	"strings"
@@ -164,7 +165,6 @@ func fromSlash(path string) string {
 }
 
 func guessImportPath(path string) string {
-	GOPATH := os.ExpandEnv("$GOPATH")
 	path, err := filepath.Abs(path)
 	if err != nil {
 		return ""
@@ -177,7 +177,7 @@ func guessImportPath(path string) string {
 			return ""
 		}
 	}
-	for _, pkgPath := range append([]string{filepath.Join(runtime.GOROOT(), "src")}, strings.Split(GOPATH, ":")...) {
+	for _, pkgPath := range append([]string{filepath.Join(runtime.GOROOT(), "src")}, filepath.SplitList(build.Default.GOPATH)...) {
 		if pkgPath == "" {
 			continue
 		}

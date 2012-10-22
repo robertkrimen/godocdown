@@ -87,6 +87,7 @@ Along with the standard template functionality, the starting data argument has t
 
 	.ImportPath
 	// The import path for the package (string)
+	// (This field will be the empty string if godocdown is unable to guess it)
 
 --
 **godocdown** http://github.com/robertkrimen/godocdown
