@@ -65,18 +65,20 @@ var DefaultStyle = Style{
 }
 var RenderStyle = DefaultStyle
 
-func init() {
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-		flag.PrintDefaults()
-		executable, err := os.Stat(os.Args[0])
-		if err != nil {
-			return
-		}
-		time := executable.ModTime()
-		since := tme.Since(time)
-		fmt.Fprintf(os.Stderr, "---\n%s (%.2f)\n", time.Format("2006-01-02 15:04 MST"), since.Minutes())
+func usage() {
+	fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+	flag.PrintDefaults()
+	executable, err := os.Stat(os.Args[0])
+	if err != nil {
+		return
 	}
+	time := executable.ModTime()
+	since := tme.Since(time)
+	fmt.Fprintf(os.Stderr, "---\n%s (%.2f)\n", time.Format("2006-01-02 15:04 MST"), since.Minutes())
+}
+
+func init() {
+	flag.Usage = usage
 }
 
 type Style struct {
@@ -375,7 +377,9 @@ func loadTemplate(document *_document) *tmplate.Template {
 func main() {
 	flag.Parse()
 	target := flag.Arg(0)
+	fallbackUsage := false
 	if target == "" {
+		fallbackUsage = true
 		target = "."
 	}
 
@@ -400,9 +404,14 @@ func main() {
 	}
 	if document == nil {
 		// Nothing found.
-		rootPath, _ := filepath.Abs(target)
-		fmt.Fprintf(os.Stderr, "No package/documentation found in %s (%s)\n", target, rootPath)
-		os.Exit(64)
+		if fallbackUsage {
+			usage()
+			os.Exit(1)
+		} else {
+			rootPath, _ := filepath.Abs(target)
+			fmt.Fprintf(os.Stderr, "Could not find package/documentation for %s (%s)\n", target, rootPath)
+			os.Exit(64)
+		}
 	}
 
 	template := loadTemplate(document)
