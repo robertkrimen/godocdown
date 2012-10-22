@@ -9,7 +9,7 @@ import (
 )
 
 func canTestImport() bool {
-	have := guessImportPath("example")
+	have := guessImportPath("../example")
 	return len(have) > 0
 }
 
@@ -29,6 +29,7 @@ func TestGuessImportPath(t *testing.T) {
 	testImportPath("example", "github.com/robertkrimen/godocdown/godocdown/example")
 	testImportPath("/not/in/GOfromSlash", "")
 	testImportPath("in/GOfromSlash", "github.com/robertkrimen/godocdown/godocdown/in/GOfromSlash")
+	testImportPath(".", "github.com/robertkrimen/godocdown/godocdown")
 	testImportPath("../example/example", "github.com/robertkrimen/godocdown/example")
 }
 

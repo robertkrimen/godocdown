@@ -16,7 +16,7 @@ import (
 	"path/filepath"
 	tme "time"
 	tmplate "text/template"
-	"runtime"
+
 )
 
 const (
@@ -99,6 +99,7 @@ type Style struct {
 type _document struct {
 	Name string
 	pkg *doc.Package
+	buildPkg *build.Package
 	IsCommand bool
 	ImportPath string
 }
@@ -164,33 +165,37 @@ func fromSlash(path string) string {
 	return filepath.FromSlash(path)
 }
 
-func guessImportPath(path string) string {
-	path, err := filepath.Abs(path)
-	if err != nil {
-		return ""
+func findPackagePath(target string) (string, bool) {
+	if build.IsLocalImport(target) {
+		// Just assume that target is the path
+		return target, true
 	}
-	_, err = os.Lstat(path);
-	if _, err := os.Lstat(path); err == nil {
-		// Follow symbolic lik
-		path, err = filepath.EvalSymlinks(path)
-		if err != nil {
-			return ""
-		}
-	}
-	for _, pkgPath := range append([]string{filepath.Join(runtime.GOROOT(), "src")}, filepath.SplitList(build.Default.GOPATH)...) {
-		if pkgPath == "" {
-			continue
-		}
-		if strings.HasPrefix(path, pkgPath) {
-			// Actually, either /src/ (GOPATH) or /pkg/ (GOROOT), but
-			// they're the same length, so it won't matter
-			return filepath.ToSlash(path[len(pkgPath) + len(fromSlash("/src/")):])
-		}
-	}
-	return ""
+	return "", false
 }
 
-func loadDocument(path string) (*_document, error) {
+func buildImport(target string) *build.Package {
+	path, _ := filepath.Abs(".")
+	buildPkg, _ := build.Default.Import(target, path, build.FindOnly)
+	return buildPkg
+}
+
+func guessImportPath(target string) string {
+	buildPkg := buildImport(target)
+	if buildPkg.Dir == "" {
+		return ""
+	}
+	return buildPkg.ImportPath
+}
+
+func loadDocument(target string) (*_document, error) {
+
+	buildPkg := buildImport(target)
+	if buildPkg.Dir == "" {
+		return nil, fmt.Errorf("Could not find package \"%s\"", target)
+	}
+
+	path := buildPkg.Dir
+
 	fset = token.NewFileSet()
 	pkgSet, err := parser.ParseDir(fset, path, func(file os.FileInfo) bool {
 		name := file.Name()
@@ -207,7 +212,7 @@ func loadDocument(path string) (*_document, error) {
 	if read, err := ioutil.ReadFile(filepath.Join(path, ".godocdown.import")); err == nil {
 		importPath = strings.TrimSpace(strings.Split(string(read), "\n")[0])
 	} else {
-		importPath = guessImportPath(path)
+		importPath = buildPkg.ImportPath
 	}
 
 	for _, pkg := range pkgSet {
@@ -238,8 +243,10 @@ func loadDocument(path string) (*_document, error) {
 		document := &_document{
 			Name: name,
 			pkg: pkg,
+			buildPkg: buildPkg,
 			IsCommand: isCommand,
 			ImportPath: importPath,
+
 		}
 
 		return document, nil
@@ -349,12 +356,12 @@ func findTemplate(path string) string {
 }
 
 
-func loadTemplate(document *_document, path string) *tmplate.Template {
+func loadTemplate(document *_document) *tmplate.Template {
 	if *no_template_flag {
 		return nil
 	}
 
-	templatePath := findTemplate(path)
+	templatePath := findTemplate(document.buildPkg.Dir)
 	if templatePath == "" {
 		return nil
 	}
@@ -371,9 +378,9 @@ func loadTemplate(document *_document, path string) *tmplate.Template {
 
 func main() {
 	flag.Parse()
-	path := flag.Arg(0)
-	if path == "" {
-		path = "."
+	target := flag.Arg(0)
+	if target == "" {
+		target = "."
 	}
 
 	RenderStyle.IncludeSignature = *signature_flag
@@ -391,18 +398,18 @@ func main() {
 		RenderStyle.SynopsisHeading = nil
 	}
 
-	document, err := loadDocument(path)
+	document, err := loadDocument(target)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 	}
 	if document == nil {
 		// Nothing found.
-		rootPath, _ := filepath.Abs(path)
-		fmt.Fprintf(os.Stderr, "No package/documentation found in %s (%s)\n", path, rootPath)
+		rootPath, _ := filepath.Abs(target)
+		fmt.Fprintf(os.Stderr, "No package/documentation found in %s (%s)\n", target, rootPath)
 		os.Exit(64)
 	}
 
-	template := loadTemplate(document, path)
+	template := loadTemplate(document)
 
 	var buffer bytes.Buffer
 	if template == nil {
