@@ -1,34 +1,33 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"flag"
+	"fmt"
+	"go/build"
 	"go/doc"
 	"go/parser"
-	"go/token"
-	"go/build"
 	"go/printer"
-	"os"
-	"strings"
-	"bytes"
+	"go/token"
 	"io/ioutil"
-	"regexp"
+	"os"
 	"path/filepath"
-	tme "time"
+	"regexp"
+	"strings"
 	tmplate "text/template"
-
+	tme "time"
 )
 
 const (
 	punchCardWidth = 80
-	debug = false
+	debug          = false
 )
 
 // Flags
 var (
 	signature_flag = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
-	plain_flag = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
-	heading_flag = flag.String("heading", "TitleCase1Word", "Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, \"\"")
+	plain_flag     = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
+	heading_flag   = flag.String("heading", "TitleCase1Word", "Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, \"\"")
 	// TODO Make this work
 	//template_flag = flag.String("template", "*", "The template filename/pattern to look for when rendering via template")
 	no_template_flag = flag.Bool("no-template", false, "Disable template processing")
@@ -37,28 +36,28 @@ var (
 var (
 	fset *token.FileSet
 
-	synopsisHeading1Word_Regexp = regexp.MustCompile("(?m)^([A-Za-z0-9_-]+)$")
-	synopsisHeadingTitleCase_Regexp = regexp.MustCompile("(?m)^((?:[A-Z][A-Za-z0-9_-]*)(?:[ \t]+[A-Z][A-Za-z0-9_-]*)*)$")
-	synopsisHeadingTitle_Regexp = regexp.MustCompile("(?m)^((?:[A-Za-z0-9_-]+)(?:[ \t]+[A-Za-z0-9_-]+)*)$")
+	synopsisHeading1Word_Regexp          = regexp.MustCompile("(?m)^([A-Za-z0-9_-]+)$")
+	synopsisHeadingTitleCase_Regexp      = regexp.MustCompile("(?m)^((?:[A-Z][A-Za-z0-9_-]*)(?:[ \t]+[A-Z][A-Za-z0-9_-]*)*)$")
+	synopsisHeadingTitle_Regexp          = regexp.MustCompile("(?m)^((?:[A-Za-z0-9_-]+)(?:[ \t]+[A-Za-z0-9_-]+)*)$")
 	synopsisHeadingTitleCase1Word_Regexp = regexp.MustCompile("(?m)^((?:[A-Za-z0-9_-]+)|(?:(?:[A-Z][A-Za-z0-9_-]*)(?:[ \t]+[A-Z][A-Za-z0-9_-]*)*))$")
 
-	strip_Regexp = regexp.MustCompile("(?m)^\\s*// contains filtered or unexported fields\\s*\n")
-	indent_Regexp = regexp.MustCompile("(?m)^([^\\n])") // Match at least one character at the start of the line
+	strip_Regexp           = regexp.MustCompile("(?m)^\\s*// contains filtered or unexported fields\\s*\n")
+	indent_Regexp          = regexp.MustCompile("(?m)^([^\\n])") // Match at least one character at the start of the line
 	synopsisHeading_Regexp = synopsisHeading1Word_Regexp
 )
 
 var DefaultStyle = Style{
 	IncludeImport: true,
 
-	SynopsisHeader: "###",
+	SynopsisHeader:  "###",
 	SynopsisHeading: synopsisHeadingTitleCase1Word_Regexp,
 
 	UsageHeader: "## Usage\n",
 
-	ConstantHeader: "####",
-	VariableHeader: "####",
-	FunctionHeader: "####",
-	TypeHeader: "####",
+	ConstantHeader:     "####",
+	VariableHeader:     "####",
+	FunctionHeader:     "####",
+	TypeHeader:         "####",
 	TypeFunctionHeader: "####",
 
 	IncludeSignature: false,
@@ -84,25 +83,25 @@ func init() {
 type Style struct {
 	IncludeImport bool
 
-	SynopsisHeader string
+	SynopsisHeader  string
 	SynopsisHeading *regexp.Regexp
 
 	UsageHeader string
 
-	ConstantHeader string
-	VariableHeader string
-	FunctionHeader string
-	TypeHeader string
+	ConstantHeader     string
+	VariableHeader     string
+	FunctionHeader     string
+	TypeHeader         string
 	TypeFunctionHeader string
 
 	IncludeSignature bool
 }
 
 type _document struct {
-	Name string
-	pkg *doc.Package
-	buildPkg *build.Package
-	IsCommand bool
+	Name       string
+	pkg        *doc.Package
+	buildPkg   *build.Package
+	IsCommand  bool
 	ImportPath string
 }
 
@@ -122,7 +121,7 @@ func formatIndent(target string) string {
 
 func indentCode(target string) string {
 	if *plain_flag {
-		return indent(target + "\n", space(4))
+		return indent(target+"\n", space(4))
 	}
 	return fmt.Sprintf("```go\n%s\n```", target)
 }
@@ -154,7 +153,7 @@ func sourceOfNode(target interface{}) string {
 }
 
 func indent(target string, indent string) string {
-	return indent_Regexp.ReplaceAllString(target, indent + "$1")
+	return indent_Regexp.ReplaceAllString(target, indent+"$1")
 }
 
 func trimSpace(buffer *bytes.Buffer) {
@@ -239,12 +238,11 @@ func loadDocument(target string) (*_document, error) {
 		}
 
 		document := &_document{
-			Name: name,
-			pkg: pkg,
-			buildPkg: buildPkg,
-			IsCommand: isCommand,
+			Name:       name,
+			pkg:        pkg,
+			buildPkg:   buildPkg,
+			IsCommand:  isCommand,
 			ImportPath: importPath,
-
 		}
 
 		return document, nil
@@ -353,7 +351,6 @@ func findTemplate(path string) string {
 	return "" // Nothing found
 }
 
-
 func loadTemplate(document *_document) *tmplate.Template {
 	if *no_template_flag {
 		return nil
@@ -364,8 +361,7 @@ func loadTemplate(document *_document) *tmplate.Template {
 		return nil
 	}
 
-	template := tmplate.New("").Funcs(tmplate.FuncMap{
-	})
+	template := tmplate.New("").Funcs(tmplate.FuncMap{})
 	template, err := template.ParseFiles(templatePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing template \"%s\": %v", templatePath, err)

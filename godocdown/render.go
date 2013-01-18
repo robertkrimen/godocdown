@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"go/doc"
+	"io"
 )
 
 func renderConstantSectionTo(writer io.Writer, list []*doc.Value) {
@@ -53,8 +53,8 @@ func renderHeaderTo(writer io.Writer, document *_document) {
 	if !document.IsCommand {
 		// Import
 		if RenderStyle.IncludeImport {
-			if (document.ImportPath != "") {
-				fmt.Fprintf(writer, space(4) + "import \"%s\"\n\n", document.ImportPath)
+			if document.ImportPath != "" {
+				fmt.Fprintf(writer, space(4)+"import \"%s\"\n\n", document.ImportPath)
 			}
 		}
 	}

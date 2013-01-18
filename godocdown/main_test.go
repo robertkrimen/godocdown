@@ -1,11 +1,11 @@
 package main
 
 import (
-	"strings"
 	"bytes"
-	"testing"
-	"regexp"
 	. "github.com/robertkrimen/terst"
+	"regexp"
+	"strings"
+	"testing"
 )
 
 func canTestImport() bool {
@@ -68,7 +68,7 @@ What it says on the tin above.
 
 A title with a-dash
 	`
-	is := func(scanner *regexp.Regexp, want string){
+	is := func(scanner *regexp.Regexp, want string) {
 		have := headlineSynopsis(synopsis, "#", scanner)
 		Is(strings.TrimSpace(have), strings.TrimSpace(want))
 	}
@@ -164,7 +164,7 @@ func Test(t *testing.T) {
 	}
 
 	buffer := bytes.NewBuffer([]byte{})
-	is := func(want string){
+	is := func(want string) {
 		Is(strings.TrimSpace(buffer.String()), strings.TrimSpace(want))
 		buffer.Reset()
 	}
