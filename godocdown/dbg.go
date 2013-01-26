@@ -1,9 +1,7 @@
 package main
 
 import (
-	_dbg "github.com/robertkrimen/dbg"
+	Dbg "github.com/robertkrimen/godocdown/godocdown/dbg"
 )
 
-func dbg(input ...interface{}) {
-	_dbg.Dbg(input...)
-}
+var dbg, dbgf = Dbg.New()
