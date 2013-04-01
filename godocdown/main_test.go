@@ -9,12 +9,14 @@ import (
 )
 
 func canTestImport() bool {
-	have := guessImportPath("../example")
+	have, err := guessImportPath("../example")
+	Is(err, nil)
 	return len(have) > 0
 }
 
 func testImportPath(target, want string) {
-	have := guessImportPath(fromSlash(target))
+	have, err := guessImportPath(fromSlash(target))
+	Is(err, nil)
 	if have == "" {
 		// Probably in a non-standard location, skip the test
 		return
@@ -26,7 +28,7 @@ func TestGuessImportPath(t *testing.T) {
 	Terst(t)
 
 	testImportPath("./example", "github.com/robertkrimen/godocdown/godocdown/example")
-	testImportPath("example", "github.com/robertkrimen/godocdown/godocdown/example")
+	testImportPath("../example", "github.com/robertkrimen/godocdown/example")
 	testImportPath("/not/in/GOfromSlash", "")
 	testImportPath("in/GOfromSlash", "github.com/robertkrimen/godocdown/godocdown/in/GOfromSlash")
 	testImportPath(".", "github.com/robertkrimen/godocdown/godocdown")
@@ -171,16 +173,9 @@ func Test(t *testing.T) {
 
 	renderHeaderTo(buffer, document)
 	if canTestImport() {
-		is(`
-# example
---
-    import "github.com/robertkrimen/godocdown/example"
-		`)
+		is("# example\n--\n    import \"github.com/robertkrimen/godocdown/example\"")
 	} else {
-		is(`
-# example
---
-		`)
+		is("# example\n--")
 	}
 
 	RenderStyle.IncludeImport = false

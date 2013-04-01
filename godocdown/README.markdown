@@ -1,5 +1,6 @@
-/*
-Command godocdown extracts and generates Go documentation in a GitHub-friendly Markdown format.
+# godocdown
+--
+Command godocdown generates Go documentation in a GitHub-friendly Markdown format.
 
 	$ go get github.com/robertkrimen/godocdown/godocdown
 
@@ -9,23 +10,21 @@ Command godocdown extracts and generates Go documentation in a GitHub-friendly M
 	$ godocdown > README.markdown
 
 	# Generate standard Markdown
-	$ godocdown -plain . 
+	$ godocdown -plain .
 
 This program is targeted at providing nice-looking documentation for GitHub. With this in
 mind, it generates GitHub Flavored Markdown (http://github.github.com/github-flavored-markdown/) by
 default. This can be changed with the use of the "plain" flag to generate standard Markdown.
 
-Installation
+### Install
 
 	go get github.com/robertkrimen/godocdown/godocdown
 
-Example
+### Example
 
 http://github.com/robertkrimen/godocdown/blob/master/example.markdown
 
-Usage
-
-The following options are accepted:
+### Usage
 
 	-heading="TitleCase1Word"
 		Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
@@ -50,7 +49,7 @@ The following options are accepted:
 	-plain=false
 		Emit standard Markdown, rather than Github Flavored Markdown
 
-Templating
+### Templating
 
 In addition to Markdown rendering, godocdown provides templating via text/template (http://golang.org/pkg/text/template/)
 for further customization. By putting a file named ".godocdown.template" (or one from the list below) in the same directory as your
@@ -88,5 +87,5 @@ Along with the standard template functionality, the starting data argument has t
 	// The import path for the package (string)
 	// (This field will be the empty string if godocdown is unable to guess it)
 
-*/
-package documentation
+--
+**godocdown** http://github.com/robertkrimen/godocdown

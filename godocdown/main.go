@@ -1,3 +1,91 @@
+/*
+Command godocdown generates Go documentation in a GitHub-friendly Markdown format.
+
+	$ go get github.com/robertkrimen/godocdown/godocdown
+
+	$ godocdown /path/to/package > README.markdown
+
+	# Generate documentation for the package/command in the current directory
+	$ godocdown > README.markdown
+
+	# Generate standard Markdown
+	$ godocdown -plain . 
+
+This program is targeted at providing nice-looking documentation for GitHub. With this in
+mind, it generates GitHub Flavored Markdown (http://github.github.com/github-flavored-markdown/) by
+default. This can be changed with the use of the "plain" flag to generate standard Markdown.
+
+Install
+
+	go get github.com/robertkrimen/godocdown/godocdown
+
+Example
+
+http://github.com/robertkrimen/godocdown/blob/master/example.markdown
+
+Usage
+
+	-heading="TitleCase1Word"
+		Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
+		For each line of the package declaration, godocdown attempts to detect if
+		a heading is present via a pattern match. If a heading is detected,
+		it prefixes the line with a Markdown heading indicator (typically "###").
+
+			1Word: Only a single word on the entire line
+				[A-Za-z0-9_-]+
+
+			TitleCase: A line where each word has the first letter capitalized
+				([A-Z][A-Za-z0-9_-]\s*)+
+
+			Title: A line without punctuation (e.g. a period at the end)
+				([A-Za-z0-9_-]\s*)+
+
+			TitleCase1Word: The line matches either the TitleCase or 1Word pattern
+
+	-no-template=false
+		Disable template processing
+
+	-plain=false
+		Emit standard Markdown, rather than Github Flavored Markdown
+
+Templating
+
+In addition to Markdown rendering, godocdown provides templating via text/template (http://golang.org/pkg/text/template/)
+for further customization. By putting a file named ".godocdown.template" (or one from the list below) in the same directory as your
+package/command, godocdown will know to use the file as a template.
+
+	# text/template
+	.godocdown.markdown
+	.godocdown.md
+	.godocdown.template
+	.godocdown.tmpl
+
+Along with the standard template functionality, the starting data argument has the following interface:
+
+	.Emit
+	// A method for emitting the standard documentation (what godocdown would emit without a template)
+
+	.EmitHeader
+	// A method for emitting the package name and an import line (if one is present/needed)
+
+	.EmitSynopsis
+	// A method for emitting the package declaration
+
+	.EmitUsage
+	// A method for emitting package usage, which includes a constants section, a variables section,
+	// a functions section, and a types section. In addition, each type may have its own constant,
+	// variable, and/or function/method listing.
+
+	.IsCommand
+	// A boolean indicating whether the given package is a command or a plain package
+
+	.Name
+	// The name of the package/command (string)
+
+	.ImportPath
+	// The import path for the package (string)
+	// (This field will be the empty string if godocdown is unable to guess it)
+*/
 package main
 
 import (
@@ -166,27 +254,74 @@ func fromSlash(path string) string {
 	return filepath.FromSlash(path)
 }
 
-func buildImport(target string) (buildPkg *build.Package) {
-	if filepath.IsAbs(target) {
-		buildPkg, _ = build.Default.ImportDir(target, build.FindOnly)
-		return
+/*
+    This is how godoc does it:
+
+	// Determine paths.
+	//
+	// If we are passed an operating system path like . or ./foo or /foo/bar or c:\mysrc,
+	// we need to map that path somewhere in the fs name space so that routines
+	// like getPageInfo will see it.  We use the arbitrarily-chosen virtual path "/target"
+	// for this.  That is, if we get passed a directory like the above, we map that
+	// directory so that getPageInfo sees it as /target.
+	const target = "/target"
+	const cmdPrefix = "cmd/"
+	path := flag.Arg(0)
+	var forceCmd bool
+	var abspath, relpath string
+	if filepath.IsAbs(path) {
+		fs.Bind(target, OS(path), "/", bindReplace)
+		abspath = target
+	} else if build.IsLocalImport(path) {
+		cwd, _ := os.Getwd() // ignore errors
+		path = filepath.Join(cwd, path)
+		fs.Bind(target, OS(path), "/", bindReplace)
+		abspath = target
+	} else if strings.HasPrefix(path, cmdPrefix) {
+		path = path[len(cmdPrefix):]
+		forceCmd = true
+	} else if bp, _ := build.Import(path, "", build.FindOnly); bp.Dir != "" && bp.ImportPath != "" {
+		fs.Bind(target, OS(bp.Dir), "/", bindReplace)
+		abspath = target
+		relpath = bp.ImportPath
+	} else {
+		abspath = pathpkg.Join(pkgHandler.fsRoot, path)
 	}
-	path, _ := filepath.Abs(".")
-	buildPkg, _ = build.Default.Import(target, path, build.FindOnly)
-	return
+	if relpath == "" {
+		relpath = abspath
+	}
+*/
+func buildImport(target string) (*build.Package, error) {
+	if filepath.IsAbs(target) {
+		return build.Default.ImportDir(target, build.FindOnly)
+	} else if build.IsLocalImport(target) {
+		base, _ := os.Getwd()
+		path := filepath.Join(base, target)
+		return build.Default.ImportDir(path, build.FindOnly)
+	} else if pkg, _ := build.Default.Import(target, "", build.FindOnly); pkg.Dir != "" && pkg.ImportPath != "" {
+		return pkg, nil
+	}
+	path, _ := filepath.Abs(target)
+	return build.Default.ImportDir(path, build.FindOnly)
 }
 
-func guessImportPath(target string) string {
-	buildPkg := buildImport(target)
-	if buildPkg.SrcRoot == "" {
-		return ""
+func guessImportPath(target string) (string, error) {
+	buildPkg, err := buildImport(target)
+	if err != nil {
+		return "", err
 	}
-	return buildPkg.ImportPath
+	if buildPkg.SrcRoot == "" {
+		return "", nil
+	}
+	return buildPkg.ImportPath, nil
 }
 
 func loadDocument(target string) (*_document, error) {
 
-	buildPkg := buildImport(target)
+	buildPkg, err := buildImport(target)
+	if err != nil {
+		return nil, err
+	}
 	if buildPkg.Dir == "" {
 		return nil, fmt.Errorf("Could not find package \"%s\"", target)
 	}
@@ -212,40 +347,48 @@ func loadDocument(target string) (*_document, error) {
 		importPath = buildPkg.ImportPath
 	}
 
-	for _, pkg := range pkgSet {
+	{
 		isCommand := false
 		name := ""
-		pkg := doc.New(pkg, ".", 0)
-		switch pkg.Name {
-		case "main":
-			// We're probably a command, but by convention, documentation
-			// should be in the documentation package:
-			// http://golang.org/doc/articles/godoc_documenting_go_code.html
-			continue
-		case "documentation":
-			// We're a command, this package/file contains the documentation
-			// path is used to get the containing directory in the case of
-			// command documentation
-			path, err := filepath.Abs(path)
-			if err != nil {
-				panic(err)
+		var pkg *doc.Package
+
+		for _, parsePkg := range pkgSet {
+			tmpPkg := doc.New(parsePkg, ".", 0)
+			switch tmpPkg.Name {
+			case "main":
+				if isCommand {
+					// We've already see "pacakge documentation",
+					// so favor that over main.
+					continue
+				}
+				fallthrough
+			case "documentation":
+				// We're a command, this package/file contains the documentation
+				// path is used to get the containing directory in the case of
+				// command documentation
+				path, err := filepath.Abs(path)
+				if err != nil {
+					panic(err)
+				}
+				_, name = filepath.Split(path)
+				isCommand = true
+				pkg = tmpPkg
+			default:
+				// Just a regular package
+				name = tmpPkg.Name
+				pkg = tmpPkg
 			}
-			_, name = filepath.Split(path)
-			isCommand = true
-		default:
-			name = pkg.Name
-			// Just a regular package
 		}
 
-		document := &_document{
-			Name:       name,
-			pkg:        pkg,
-			buildPkg:   buildPkg,
-			IsCommand:  isCommand,
-			ImportPath: importPath,
+		if pkg != nil {
+			return &_document{
+				Name:       name,
+				pkg:        pkg,
+				buildPkg:   buildPkg,
+				IsCommand:  isCommand,
+				ImportPath: importPath,
+			}, nil
 		}
-
-		return document, nil
 	}
 
 	return nil, nil
@@ -404,9 +547,8 @@ func main() {
 			usage()
 			os.Exit(1)
 		} else {
-			rootPath, _ := filepath.Abs(target)
-			fmt.Fprintf(os.Stderr, "Could not find package/documentation for %s (%s)\n", target, rootPath)
-			os.Exit(64)
+			fmt.Fprintf(os.Stderr, "Could not find package: %s\n", target)
+			os.Exit(1)
 		}
 	}
 

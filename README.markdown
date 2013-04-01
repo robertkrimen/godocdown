@@ -1,6 +1,6 @@
 # godocdown
 --
-Command godocdown extracts and generates Go documentation in a GitHub-friendly Markdown format.
+Command godocdown generates Go documentation in a GitHub-friendly Markdown format.
 
 	$ go get github.com/robertkrimen/godocdown/godocdown
 
@@ -16,7 +16,7 @@ This program is targeted at providing nice-looking documentation for GitHub. Wit
 mind, it generates GitHub Flavored Markdown (http://github.github.com/github-flavored-markdown/) by
 default. This can be changed with the use of the "plain" flag to generate standard Markdown.
 
-### Installation
+### Install
 
 	go get github.com/robertkrimen/godocdown/godocdown
 
@@ -25,8 +25,6 @@ default. This can be changed with the use of the "plain" flag to generate standa
 http://github.com/robertkrimen/godocdown/blob/master/example.markdown
 
 ### Usage
-
-The following options are accepted:
 
 	-heading="TitleCase1Word"
 		Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
