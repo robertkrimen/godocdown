@@ -564,8 +564,9 @@ func main() {
 		err := template.Templates()[0].Execute(&buffer, document)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error running template: %v", err)
-			os.Exit(64)
+			os.Exit(1)
 		}
+		document.EmitSignatureTo(&buffer)
 	}
 
 	if debug {
