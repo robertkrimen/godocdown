@@ -301,7 +301,7 @@ func buildImport(target string) (*build.Package, error) {
 	} else if pkg, _ := build.Default.Import(target, "", build.FindOnly); pkg.Dir != "" && pkg.ImportPath != "" {
 		return pkg, nil
 	}
-	path, _ := filepath.Abs(target)
+	path, _ := filepath.Abs(target) // Even if there is an error, still try?
 	return build.Default.ImportDir(path, build.FindOnly)
 }
 
@@ -352,12 +352,14 @@ func loadDocument(target string) (*_document, error) {
 		name := ""
 		var pkg *doc.Package
 
+		// Choose the best package for documentation. Either
+		// documentation, main, or whatever the package is.
 		for _, parsePkg := range pkgSet {
 			tmpPkg := doc.New(parsePkg, ".", 0)
 			switch tmpPkg.Name {
 			case "main":
 				if isCommand {
-					// We've already see "pacakge documentation",
+					// We've already seen "pacakge documentation",
 					// so favor that over main.
 					continue
 				}
