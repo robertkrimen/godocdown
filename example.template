@@ -1,0 +1,40 @@
+# Example godocdown (strings)
+
+This markdown was generated with the help of custom template file ([example.template](http://github.com/robertkrimen/godocdown/blob/master/example.template)). To add custom
+markdown to your documentation, you can do something like:
+
+    godocdown -template=godocdown.tmpl ...
+
+The template format is the standard Go text/template: http://golang.org/pkg/text/template
+
+Along with the standard template functionality, the starting data argument has the following interface:
+
+    {{ "{{ .Emit }}" }}
+    // Emit the standard documentation (what godocdown would emit without a template)
+
+    {{ "{{ .EmitHeader }}" }}
+    // Emit the package name and an import line (if one is present/needed)
+
+    {{ "{{ .EmitSynopsis }}" }}
+    // Emit the package declaration
+
+    {{ "{{ .EmitUsage }}" }}
+    // Emit package usage, which includes a constants section, a variables section,
+    // a functions section, and a types section. In addition, each type may have its own constant,
+    // variable, and/or function/method listing.
+
+    {{ "{{ if .IsCommand  }} ... {{ end }}" }}
+    // A boolean indicating whether the given package is a command or a plain package
+
+    {{ "{{ .Name }}" }}
+    // The name of the package/command (string)
+
+    {{ "{{ .ImportPath }}" }}
+    // The import path for the package (string)
+    // (This field will be the empty string if godocdown is unable to guess it)
+
+godocdown for the http://golang.org/pkg/strings package:
+
+--
+
+{{ .Emit }}

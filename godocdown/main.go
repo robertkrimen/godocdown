@@ -62,29 +62,29 @@ package/command, godocdown will know to use the file as a template.
 
 Along with the standard template functionality, the starting data argument has the following interface:
 
-	.Emit
-	// A method for emitting the standard documentation (what godocdown would emit without a template)
+    {{ .Emit }}
+    // Emit the standard documentation (what godocdown would emit without a template)
 
-	.EmitHeader
-	// A method for emitting the package name and an import line (if one is present/needed)
+    {{ .EmitHeader }}
+    // Emit the package name and an import line (if one is present/needed)
 
-	.EmitSynopsis
-	// A method for emitting the package declaration
+    {{ .EmitSynopsis }}
+    // Emit the package declaration
 
-	.EmitUsage
-	// A method for emitting package usage, which includes a constants section, a variables section,
-	// a functions section, and a types section. In addition, each type may have its own constant,
-	// variable, and/or function/method listing.
+    {{ .EmitUsage }}
+    // Emit package usage, which includes a constants section, a variables section,
+    // a functions section, and a types section. In addition, each type may have its own constant,
+    // variable, and/or function/method listing.
 
-	.IsCommand
-	// A boolean indicating whether the given package is a command or a plain package
+    {{ if .IsCommand  }} ... {{ end }}
+    // A boolean indicating whether the given package is a command or a plain package
 
-	.Name
-	// The name of the package/command (string)
+    {{ .Name }}
+    // The name of the package/command (string)
 
-	.ImportPath
-	// The import path for the package (string)
-	// (This field will be the empty string if godocdown is unable to guess it)
+    {{ .ImportPath }}
+    // The import path for the package (string)
+    // (This field will be the empty string if godocdown is unable to guess it)
 */
 package main
 
