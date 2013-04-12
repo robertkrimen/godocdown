@@ -111,13 +111,11 @@ const (
 	debug          = false
 )
 
-// Flags
 var (
-	flag_signature = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
-	flag_plain     = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
-	flag_heading   = flag.String("heading", "TitleCase1Word", "Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, \"\"")
-	// TODO Make this work
-	//template_flag = flag.String("template", "*", "The template filename/pattern to look for when rendering via template")
+	flag_signature  = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
+	flag_plain      = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
+	flag_heading    = flag.String("heading", "TitleCase1Word", "Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, \"\"")
+	flag_template   = flag.String("template", "", "A template file")
 	flag_noTemplate = flag.Bool("no-template", false, "Disable template processing")
 )
 
@@ -501,7 +499,11 @@ func loadTemplate(document *_document) *tmplate.Template {
 		return nil
 	}
 
-	templatePath := findTemplate(document.buildPkg.Dir)
+	templatePath := *flag_template
+	if templatePath == "" {
+		templatePath = findTemplate(document.buildPkg.Dir)
+	}
+
 	if templatePath == "" {
 		return nil
 	}
