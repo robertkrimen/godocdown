@@ -113,12 +113,12 @@ const (
 
 // Flags
 var (
-	signature_flag = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
-	plain_flag     = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
-	heading_flag   = flag.String("heading", "TitleCase1Word", "Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, \"\"")
+	flag_signature = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
+	flag_plain     = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
+	flag_heading   = flag.String("heading", "TitleCase1Word", "Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, \"\"")
 	// TODO Make this work
 	//template_flag = flag.String("template", "*", "The template filename/pattern to look for when rendering via template")
-	no_template_flag = flag.Bool("no-template", false, "Disable template processing")
+	flag_noTemplate = flag.Bool("no-template", false, "Disable template processing")
 )
 
 var (
@@ -208,7 +208,7 @@ func formatIndent(target string) string {
 }
 
 func indentCode(target string) string {
-	if *plain_flag {
+	if *flag_plain {
 		return indent(target+"\n", space(4))
 	}
 	return fmt.Sprintf("```go\n%s\n```", target)
@@ -497,7 +497,7 @@ func findTemplate(path string) string {
 }
 
 func loadTemplate(document *_document) *tmplate.Template {
-	if *no_template_flag {
+	if *flag_noTemplate {
 		return nil
 	}
 
@@ -524,9 +524,9 @@ func main() {
 		target = "."
 	}
 
-	RenderStyle.IncludeSignature = *signature_flag
+	RenderStyle.IncludeSignature = *flag_signature
 
-	switch *heading_flag {
+	switch *flag_heading {
 	case "1Word":
 		RenderStyle.SynopsisHeading = synopsisHeading1Word_Regexp
 	case "TitleCase":
