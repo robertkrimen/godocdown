@@ -510,7 +510,7 @@ func loadTemplate(document *_document) *tmplate.Template {
 	template, err := template.ParseFiles(templatePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing template \"%s\": %v", templatePath, err)
-		os.Exit(64)
+		os.Exit(1)
 	}
 	return template
 }
@@ -547,7 +547,7 @@ func main() {
 		// Nothing found.
 		if fallbackUsage {
 			usage()
-			os.Exit(1)
+			os.Exit(2)
 		} else {
 			fmt.Fprintf(os.Stderr, "Could not find package: %s\n", target)
 			os.Exit(1)
