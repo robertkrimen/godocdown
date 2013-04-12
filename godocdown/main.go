@@ -1,15 +1,15 @@
 /*
 Command godocdown generates Go documentation in a GitHub-friendly Markdown format.
 
-	$ go get github.com/robertkrimen/godocdown/godocdown
+    $ go get github.com/robertkrimen/godocdown/godocdown
 
-	$ godocdown /path/to/package > README.markdown
+    $ godocdown /path/to/package > README.markdown
 
-	# Generate documentation for the package/command in the current directory
-	$ godocdown > README.markdown
+    # Generate documentation for the package/command in the current directory
+    $ godocdown > README.markdown
 
-	# Generate standard Markdown
-	$ godocdown -plain . 
+    # Generate standard Markdown
+    $ godocdown -plain . 
 
 This program is targeted at providing nice-looking documentation for GitHub. With this in
 mind, it generates GitHub Flavored Markdown (http://github.github.com/github-flavored-markdown/) by
@@ -17,7 +17,7 @@ default. This can be changed with the use of the "plain" flag to generate standa
 
 Install
 
-	go get github.com/robertkrimen/godocdown/godocdown
+    go get github.com/robertkrimen/godocdown/godocdown
 
 Example
 
@@ -25,28 +25,30 @@ http://github.com/robertkrimen/godocdown/blob/master/example.markdown
 
 Usage
 
-	-heading="TitleCase1Word"
-		Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
-		For each line of the package declaration, godocdown attempts to detect if
-		a heading is present via a pattern match. If a heading is detected,
-		it prefixes the line with a Markdown heading indicator (typically "###").
+    -template="": The template file to use
 
-			1Word: Only a single word on the entire line
-				[A-Za-z0-9_-]+
+    -no-template=false
+        Disable template processing
 
-			TitleCase: A line where each word has the first letter capitalized
-				([A-Z][A-Za-z0-9_-]\s*)+
+    -plain=false
+        Emit standard Markdown, rather than Github Flavored Markdown
 
-			Title: A line without punctuation (e.g. a period at the end)
-				([A-Za-z0-9_-]\s*)+
+    -heading="TitleCase1Word"
+        Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
+        For each line of the package declaration, godocdown attempts to detect if
+        a heading is present via a pattern match. If a heading is detected,
+        it prefixes the line with a Markdown heading indicator (typically "###").
 
-			TitleCase1Word: The line matches either the TitleCase or 1Word pattern
+        1Word: Only a single word on the entire line
+            [A-Za-z0-9_-]+
 
-	-no-template=false
-		Disable template processing
+        TitleCase: A line where each word has the first letter capitalized
+            ([A-Z][A-Za-z0-9_-]\s*)+
 
-	-plain=false
-		Emit standard Markdown, rather than Github Flavored Markdown
+        Title: A line without punctuation (e.g. a period at the end)
+            ([A-Za-z0-9_-]\s*)+
+
+        TitleCase1Word: The line matches either the TitleCase or 1Word pattern
 
 Templating
 
@@ -54,11 +56,13 @@ In addition to Markdown rendering, godocdown provides templating via text/templa
 for further customization. By putting a file named ".godocdown.template" (or one from the list below) in the same directory as your
 package/command, godocdown will know to use the file as a template.
 
-	# text/template
-	.godocdown.markdown
-	.godocdown.md
-	.godocdown.template
-	.godocdown.tmpl
+    # text/template
+    .godocdown.markdown
+    .godocdown.md
+    .godocdown.template
+    .godocdown.tmpl
+
+A template file can also be specified with the "-template" parameter
 
 Along with the standard template functionality, the starting data argument has the following interface:
 
@@ -85,6 +89,7 @@ Along with the standard template functionality, the starting data argument has t
     {{ .ImportPath }}
     // The import path for the package (string)
     // (This field will be the empty string if godocdown is unable to guess it)
+
 */
 package main
 
@@ -115,7 +120,7 @@ var (
 	flag_signature  = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
 	flag_plain      = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
 	flag_heading    = flag.String("heading", "TitleCase1Word", "Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, \"\"")
-	flag_template   = flag.String("template", "", "A template file")
+	flag_template   = flag.String("template", "", "The template file to use")
 	flag_noTemplate = flag.Bool("no-template", false, "Disable template processing")
 )
 
