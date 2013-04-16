@@ -1,15 +1,15 @@
 /*
 Command godocdown generates Go documentation in a GitHub-friendly Markdown format.
 
-    $ go get github.com/robertkrimen/godocdown/godocdown
-
-    $ godocdown /path/to/package > README.markdown
-
-    # Generate documentation for the package/command in the current directory
-    $ godocdown > README.markdown
-
-    # Generate standard Markdown
-    $ godocdown -plain . 
+    $ go get github.com/robertkrimen/godocdown/godocdown                         
+                                                                                 
+    $ godocdown /path/to/package > README.markdown                               
+                                                                                 
+    # Generate documentation for the package/command in the current directory    
+    $ godocdown > README.markdown                                                
+                                                                                 
+    # Generate standard Markdown                                                 
+    $ godocdown -plain .                                                         
 
 This program is targeted at providing nice-looking documentation for GitHub. With this in
 mind, it generates GitHub Flavored Markdown (http://github.github.com/github-flavored-markdown/) by
@@ -25,30 +25,30 @@ http://github.com/robertkrimen/godocdown/blob/master/example.markdown
 
 Usage
 
-    -template="": The template file to use
-
-    -no-template=false
-        Disable template processing
-
-    -plain=false
-        Emit standard Markdown, rather than Github Flavored Markdown
-
-    -heading="TitleCase1Word"
-        Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""
-        For each line of the package declaration, godocdown attempts to detect if
-        a heading is present via a pattern match. If a heading is detected,
-        it prefixes the line with a Markdown heading indicator (typically "###").
-
-        1Word: Only a single word on the entire line
-            [A-Za-z0-9_-]+
-
-        TitleCase: A line where each word has the first letter capitalized
-            ([A-Z][A-Za-z0-9_-]\s*)+
-
-        Title: A line without punctuation (e.g. a period at the end)
-            ([A-Za-z0-9_-]\s*)+
-
-        TitleCase1Word: The line matches either the TitleCase or 1Word pattern
+    -template="": The template file to use                                           
+                                                                                     
+    -no-template=false                                                               
+        Disable template processing                                                  
+                                                                                     
+    -plain=false                                                                     
+        Emit standard Markdown, rather than Github Flavored Markdown                 
+                                                                                     
+    -heading="TitleCase1Word"                                                        
+        Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, ""        
+        For each line of the package declaration, godocdown attempts to detect if    
+        a heading is present via a pattern match. If a heading is detected,          
+        it prefixes the line with a Markdown heading indicator (typically "###").    
+                                                                                     
+        1Word: Only a single word on the entire line                                 
+            [A-Za-z0-9_-]+                                                           
+                                                                                     
+        TitleCase: A line where each word has the first letter capitalized           
+            ([A-Z][A-Za-z0-9_-]\s*)+                                                 
+                                                                                     
+        Title: A line without punctuation (e.g. a period at the end)                 
+            ([A-Za-z0-9_-]\s*)+                                                      
+                                                                                     
+        TitleCase1Word: The line matches either the TitleCase or 1Word pattern       
 
 Templating
 
@@ -66,30 +66,29 @@ A template file can also be specified with the "-template" parameter
 
 Along with the standard template functionality, the starting data argument has the following interface:
 
-    {{ .Emit }}
-    // Emit the standard documentation (what godocdown would emit without a template)
-
-    {{ .EmitHeader }}
-    // Emit the package name and an import line (if one is present/needed)
-
-    {{ .EmitSynopsis }}
-    // Emit the package declaration
-
-    {{ .EmitUsage }}
-    // Emit package usage, which includes a constants section, a variables section,
-    // a functions section, and a types section. In addition, each type may have its own constant,
-    // variable, and/or function/method listing.
-
-    {{ if .IsCommand  }} ... {{ end }}
-    // A boolean indicating whether the given package is a command or a plain package
-
-    {{ .Name }}
-    // The name of the package/command (string)
-
-    {{ .ImportPath }}
-    // The import path for the package (string)
-    // (This field will be the empty string if godocdown is unable to guess it)
-
+    {{ .Emit }}                                                                                       
+    // Emit the standard documentation (what godocdown would emit without a template)                 
+                                                                                                      
+    {{ .EmitHeader }}                                                                                 
+    // Emit the package name and an import line (if one is present/needed)                            
+                                                                                                      
+    {{ .EmitSynopsis }}                                                                               
+    // Emit the package declaration                                                                   
+                                                                                                      
+    {{ .EmitUsage }}                                                                                  
+    // Emit package usage, which includes a constants section, a variables section,                   
+    // a functions section, and a types section. In addition, each type may have its own constant,    
+    // variable, and/or function/method listing.                                                      
+                                                                                                      
+    {{ if .IsCommand  }} ... {{ end }}                                                                
+    // A boolean indicating whether the given package is a command or a plain package                 
+                                                                                                      
+    {{ .Name }}                                                                                       
+    // The name of the package/command (string)                                                       
+                                                                                                      
+    {{ .ImportPath }}                                                                                 
+    // The import path for the package (string)                                                       
+    // (This field will be the empty string if godocdown is unable to guess it)                       
 */
 package main
 
@@ -107,8 +106,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	tmplate "text/template"
-	tme "time"
+	Template "text/template"
+	Time "time"
 )
 
 const (
@@ -135,6 +134,7 @@ var (
 	strip_Regexp           = regexp.MustCompile("(?m)^\\s*// contains filtered or unexported fields\\s*\n")
 	indent_Regexp          = regexp.MustCompile("(?m)^([^\\n])") // Match at least one character at the start of the line
 	synopsisHeading_Regexp = synopsisHeading1Word_Regexp
+	match_7f               = regexp.MustCompile(`(?m)[\t ]*\x7f[\t ]*$`)
 )
 
 var DefaultStyle = Style{
@@ -163,7 +163,7 @@ func usage() {
 		return
 	}
 	time := executable.ModTime()
-	since := tme.Since(time)
+	since := Time.Since(time)
 	fmt.Fprintf(os.Stderr, "---\n%s (%.2f)\n", time.Format("2006-01-02 15:04 MST"), since.Minutes())
 }
 
@@ -194,6 +194,10 @@ type _document struct {
 	buildPkg   *build.Package
 	IsCommand  bool
 	ImportPath string
+}
+
+func takeOut7f(input string) string {
+	return match_7f.ReplaceAllString(input, "")
 }
 
 func _formatIndent(target, indent, preIndent string) string {
@@ -245,6 +249,15 @@ func sourceOfNode(target interface{}) string {
 
 func indent(target string, indent string) string {
 	return indent_Regexp.ReplaceAllString(target, indent+"$1")
+}
+
+func filterText(input string) string {
+	// Why is this here?
+	// Normally, godoc will ALWAYS collapse adjacent lines separated only by whitespace.
+	// However, if you place a (normally invisible) \x7f character in the documentation,
+	// this collapse will not happen. Thankfully, Markdown does not need this sort of hack,
+	// so we remove it.
+	return takeOut7f(input)
 }
 
 func trimSpace(buffer *bytes.Buffer) {
@@ -362,7 +375,7 @@ func loadDocument(target string) (*_document, error) {
 			switch tmpPkg.Name {
 			case "main":
 				if isCommand {
-					// We've already seen "pacakge documentation",
+					// We've already seen "package documentation",
 					// so favor that over main.
 					continue
 				}
@@ -499,7 +512,7 @@ func findTemplate(path string) string {
 	return "" // Nothing found
 }
 
-func loadTemplate(document *_document) *tmplate.Template {
+func loadTemplate(document *_document) *Template.Template {
 	if *flag_noTemplate {
 		return nil
 	}
@@ -513,7 +526,7 @@ func loadTemplate(document *_document) *tmplate.Template {
 		return nil
 	}
 
-	template := tmplate.New("").Funcs(tmplate.FuncMap{})
+	template := Template.New("").Funcs(Template.FuncMap{})
 	template, err := template.ParseFiles(templatePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing template \"%s\": %v", templatePath, err)

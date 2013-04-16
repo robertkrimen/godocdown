@@ -1,0 +1,23 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+my @input = <STDIN>;
+my $longest = 0;
+for (@input) {
+    chomp;
+    s/\s*\x{7f}\s*$//;
+    my $length = length $_;
+    if ($length > $longest) {
+        $longest = $length;
+    }
+}
+$longest += 4;
+for (@input) {
+    chomp;
+    my $length = length $_;
+    print $_;
+    print " " x ($longest - $length);
+    print "\x{7f}\n";
+}

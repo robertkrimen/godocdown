@@ -8,13 +8,13 @@ import (
 
 func renderConstantSectionTo(writer io.Writer, list []*doc.Value) {
 	for _, entry := range list {
-		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
+		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(filterText(entry.Doc)))
 	}
 }
 
 func renderVariableSectionTo(writer io.Writer, list []*doc.Value) {
 	for _, entry := range list {
-		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
+		fmt.Fprintf(writer, "%s\n%s\n", indentCode(sourceOfNode(entry.Decl)), formatIndent(filterText(entry.Doc)))
 	}
 }
 
@@ -30,7 +30,7 @@ func renderFunctionSectionTo(writer io.Writer, list []*doc.Func, inTypeSection b
 		if entry.Recv != "" {
 			receiver = fmt.Sprintf("(%s) ", entry.Recv)
 		}
-		fmt.Fprintf(writer, "%s func %s%s\n\n%s\n%s\n", header, receiver, entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
+		fmt.Fprintf(writer, "%s func %s%s\n\n%s\n%s\n", header, receiver, entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(filterText(entry.Doc)))
 	}
 }
 
@@ -39,7 +39,7 @@ func renderTypeSectionTo(writer io.Writer, list []*doc.Type) {
 	header := RenderStyle.TypeHeader
 
 	for _, entry := range list {
-		fmt.Fprintf(writer, "%s type %s\n\n%s\n\n%s\n", header, entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(entry.Doc))
+		fmt.Fprintf(writer, "%s type %s\n\n%s\n\n%s\n", header, entry.Name, indentCode(sourceOfNode(entry.Decl)), formatIndent(filterText(entry.Doc)))
 		renderConstantSectionTo(writer, entry.Consts)
 		renderVariableSectionTo(writer, entry.Vars)
 		renderFunctionSectionTo(writer, entry.Funcs, true)
@@ -61,7 +61,7 @@ func renderHeaderTo(writer io.Writer, document *_document) {
 }
 
 func renderSynopsisTo(writer io.Writer, document *_document) {
-	fmt.Fprintf(writer, "%s\n", headifySynopsis(document.pkg.Doc))
+	fmt.Fprintf(writer, "%s\n", headifySynopsis(filterText(document.pkg.Doc)))
 }
 
 func renderUsageTo(writer io.Writer, document *_document) {

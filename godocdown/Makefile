@@ -1,19 +1,18 @@
 .PHONY: build test test-example install release
 
 build: test
-	go build -v
+	go build
 
 test:
 	go test -i
-	go test -v
+	go test
 
 test-example: build
 	./godocdown -signature example > test/README.markdown
 	#cd test && git commit -m 'WIP' * && git push
 
 install:
-	go install -v
+	go install
 
 release:
 	$(MAKE) -C .. $@
-
