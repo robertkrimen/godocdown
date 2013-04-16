@@ -374,9 +374,9 @@ func loadDocument(target string) (*_document, error) {
 			tmpPkg := doc.New(parsePkg, ".", 0)
 			switch tmpPkg.Name {
 			case "main":
-				if isCommand {
-					// We've already seen "package documentation",
-					// so favor that over main.
+				if isCommand || name != "" {
+					// We've already seen "package documentation"
+					// (or something else), so favor that over main.
 					continue
 				}
 				fallthrough
