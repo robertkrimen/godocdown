@@ -87,8 +87,8 @@ Unicode case-folding.
 func Fields(s string) []string
 ```
 Fields splits the string s around each instance of one or more consecutive white
-space characters, returning an array of substrings of s or an empty list if s
-contains only white space.
+space characters, as defined by unicode.IsSpace, returning an array of
+substrings of s or an empty list if s contains only white space.
 
 #### func  FieldsFunc
 
@@ -254,6 +254,9 @@ func Title(s string) string
 Title returns a copy of the string s with all Unicode letters that begin words
 mapped to their title case.
 
+BUG: The rule Title uses for word boundaries does not handle Unicode punctuation
+properly.
+
 #### func  ToLower
 
 ```go
@@ -334,6 +337,14 @@ func TrimLeftFunc(s string, f func(rune) bool) string
 TrimLeftFunc returns a slice of the string s with all leading Unicode code
 points c satisfying f(c) removed.
 
+#### func  TrimPrefix
+
+```go
+func TrimPrefix(s, prefix string) string
+```
+TrimPrefix returns s without the provided leading prefix string. If s doesn't
+start with prefix, s is returned unchanged.
+
 #### func  TrimRight
 
 ```go
@@ -358,6 +369,14 @@ func TrimSpace(s string) string
 TrimSpace returns a slice of the string s, with all leading and trailing white
 space removed, as defined by Unicode.
 
+#### func  TrimSuffix
+
+```go
+func TrimSuffix(s, suffix string) string
+```
+TrimSuffix returns s without the provided trailing suffix string. If s doesn't
+end with suffix, s is returned unchanged.
+
 #### type Reader
 
 ```go
@@ -365,8 +384,8 @@ type Reader struct {
 }
 ```
 
-A Reader implements the io.Reader, io.ReaderAt, io.Seeker, io.ByteScanner, and
-io.RuneScanner interfaces by reading from a string.
+A Reader implements the io.Reader, io.ReaderAt, io.Seeker, io.WriterTo,
+io.ByteScanner, and io.RuneScanner interfaces by reading from a string.
 
 #### func  NewReader
 
@@ -425,6 +444,13 @@ func (r *Reader) UnreadByte() error
 ```go
 func (r *Reader) UnreadRune() error
 ```
+
+#### func (*Reader) WriteTo
+
+```go
+func (r *Reader) WriteTo(w io.Writer) (n int64, err error)
+```
+WriteTo implements the io.WriterTo interface.
 
 #### type Replacer
 

@@ -32,7 +32,7 @@ func TestGuessImportPath(t *testing.T) {
 	testImportPath("/not/in/GOfromSlash", "")
 	testImportPath("in/GOfromSlash", "github.com/robertkrimen/godocdown/godocdown/in/GOfromSlash")
 	testImportPath(".", "github.com/robertkrimen/godocdown/godocdown")
-	testImportPath("../example/example", "github.com/robertkrimen/godocdown/example")
+	testImportPath("../example/example", "github.com/robertkrimen/godocdown/example/example")
 }
 
 func TestFindTemplate(t *testing.T) {
