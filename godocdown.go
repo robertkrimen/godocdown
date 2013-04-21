@@ -9,3 +9,7 @@
 //      $ godocdown .
 //
 package godocdown
+
+import (
+	_ "github.com/robertkrimen/godocdown/godocdown"
+)
