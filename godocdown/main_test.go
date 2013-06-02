@@ -3,6 +3,7 @@ package main
 import (
 	. "./terst"
 	"bytes"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -29,7 +30,10 @@ func TestGuessImportPath(t *testing.T) {
 
 	testImportPath("./example", "github.com/robertkrimen/godocdown/godocdown/example")
 	testImportPath("../example", "github.com/robertkrimen/godocdown/example")
-	testImportPath("/not/in/GOfromSlash", "")
+	if filepath.Separator == '/' {
+		// This test does not work well on windows
+		testImportPath("/not/in/GOfromSlash", "")
+	}
 	testImportPath("in/GOfromSlash", "github.com/robertkrimen/godocdown/godocdown/in/GOfromSlash")
 	testImportPath(".", "github.com/robertkrimen/godocdown/godocdown")
 	testImportPath("../example/example", "github.com/robertkrimen/godocdown/example/example")
@@ -37,10 +41,10 @@ func TestGuessImportPath(t *testing.T) {
 
 func TestFindTemplate(t *testing.T) {
 	Terst(t)
-	Is(findTemplate(fromSlash("../.test/godocdown.template")), fromSlash("../.test/godocdown.template/.godocdown.template"))
-	Is(findTemplate(fromSlash("../.test/godocdown.tmpl")), fromSlash("../.test/godocdown.tmpl/.godocdown.tmpl"))
-	Is(findTemplate(fromSlash("../.test/godocdown.md")), fromSlash("../.test/godocdown.md/.godocdown.md"))
-	Is(findTemplate(fromSlash("../.test/godocdown.markdown")), fromSlash("../.test/godocdown.markdown/.godocdown.markdown"))
+	Is(findTemplate(fromSlash(".test/godocdown.template")), fromSlash(".test/godocdown.template/.godocdown.template"))
+	Is(findTemplate(fromSlash(".test/godocdown.tmpl")), fromSlash(".test/godocdown.tmpl/.godocdown.tmpl"))
+	Is(findTemplate(fromSlash(".test/godocdown.md")), fromSlash(".test/godocdown.md/.godocdown.md"))
+	Is(findTemplate(fromSlash(".test/godocdown.markdown")), fromSlash(".test/godocdown.markdown/.godocdown.markdown"))
 }
 
 func TestIndent(t *testing.T) {
