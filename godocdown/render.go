@@ -54,14 +54,14 @@ func renderHeaderTo(writer io.Writer, document *_document) {
 		// Import
 		if RenderStyle.IncludeImport {
 			if document.ImportPath != "" {
-				fmt.Fprintf(writer, space(4)+"import \"%s\"\n\n", document.ImportPath)
+				fmt.Fprintf(writer, spacer(4)+"import \"%s\"\n\n", document.ImportPath)
 			}
 		}
 	}
 }
 
 func renderSynopsisTo(writer io.Writer, document *_document) {
-	fmt.Fprintf(writer, "%s\n", headifySynopsis(filterText(document.pkg.Doc)))
+	fmt.Fprintf(writer, "%s\n", headifySynopsis(formatIndent(filterText(document.pkg.Doc))))
 }
 
 func renderUsageTo(writer io.Writer, document *_document) {

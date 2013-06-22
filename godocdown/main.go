@@ -202,21 +202,21 @@ func takeOut7f(input string) string {
 
 func _formatIndent(target, indent, preIndent string) string {
 	var buffer bytes.Buffer
-	doc.ToText(&buffer, target, indent, preIndent, punchCardWidth-2*len(indent))
+	toText(&buffer, target, indent, preIndent, punchCardWidth-2*len(indent))
 	return buffer.String()
 }
 
-func space(width int) string {
+func spacer(width int) string {
 	return strings.Repeat(" ", width)
 }
 
 func formatIndent(target string) string {
-	return _formatIndent(target, space(0), space(4))
+	return _formatIndent(target, spacer(0), spacer(4))
 }
 
 func indentCode(target string) string {
 	if *flag_plain {
-		return indent(target+"\n", space(4))
+		return indent(target+"\n", spacer(4))
 	}
 	return fmt.Sprintf("```go\n%s\n```", target)
 }

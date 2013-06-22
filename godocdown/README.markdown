@@ -1,6 +1,7 @@
 # godocdown
 --
-Command godocdown generates Go documentation in a GitHub-friendly Markdown format.
+Command godocdown generates Go documentation in a GitHub-friendly Markdown
+format.
 
     $ go get github.com/robertkrimen/godocdown/godocdown
 
@@ -12,13 +13,15 @@ Command godocdown generates Go documentation in a GitHub-friendly Markdown forma
     # Generate standard Markdown
     $ godocdown -plain .
 
-This program is targeted at providing nice-looking documentation for GitHub. With this in
-mind, it generates GitHub Flavored Markdown (http://github.github.com/github-flavored-markdown/) by
-default. This can be changed with the use of the "plain" flag to generate standard Markdown.
+This program is targeted at providing nice-looking documentation for GitHub.
+With this in mind, it generates GitHub Flavored Markdown
+(http://github.github.com/github-flavored-markdown/) by default. This can be
+changed with the use of the "plain" flag to generate standard Markdown.
 
 ### Install
 
     go get github.com/robertkrimen/godocdown/godocdown
+
 
 ### Example
 
@@ -51,11 +54,14 @@ http://github.com/robertkrimen/godocdown/blob/master/example.markdown
 
         TitleCase1Word: The line matches either the TitleCase or 1Word pattern
 
+
 ### Templating
 
-In addition to Markdown rendering, godocdown provides templating via text/template (http://golang.org/pkg/text/template/)
-for further customization. By putting a file named ".godocdown.template" (or one from the list below) in the same directory as your
-package/command, godocdown will know to use the file as a template.
+In addition to Markdown rendering, godocdown provides templating via
+text/template (http://golang.org/pkg/text/template/) for further customization.
+By putting a file named ".godocdown.template" (or one from the list below) in
+the same directory as your package/command, godocdown will know to use the file
+as a template.
 
     # text/template
     .godocdown.markdown
@@ -65,7 +71,8 @@ package/command, godocdown will know to use the file as a template.
 
 A template file can also be specified with the "-template" parameter
 
-Along with the standard template functionality, the starting data argument has the following interface:
+Along with the standard template functionality, the starting data argument has
+the following interface:
 
     {{ .Emit }}
     // Emit the standard documentation (what godocdown would emit without a template)

@@ -193,17 +193,17 @@ func Test(t *testing.T) {
 	is(`
 Package example is an example package with documentation
 
-	// Here is some code
-	func example() {
-		abc := 1 + 1
-	}()
+    // Here is some code
+    func example() {
+    	abc := 1 + 1
+    }()
 
 ### Installation
 
-	# This is how to install it:
-	$ curl http://example.com
-	$ tar xf example.tar.gz -C .
-	$ ./example &
+    # This is how to install it:
+    $ curl http://example.com
+    $ tar xf example.tar.gz -C .
+    $ ./example &
 	`)
 
 	RenderStyle.IncludeSignature = true
@@ -215,4 +215,35 @@ Package example is an example package with documentation
 
 	renderSignatureTo(buffer)
 	Is(buffer.String(), "\n\n--\n**godocdown** http://github.com/robertkrimen/godocdown\n")
+}
+
+func Test_issue3(t *testing.T) {
+	Terst(t)
+
+	document, err := loadDocument(filepath.Join(".test", "issue3"))
+	Is(err, nil)
+	IsNot(document, nil)
+
+	buffer := bytes.NewBuffer([]byte{})
+	document.EmitTo(buffer)
+	Is(strings.TrimSpace(buffer.String()), strings.TrimSpace(`
+# issue3
+--
+Documentation for package issue3
+
+Nothing happens.
+
+    Some code happens.
+
+## Usage
+
+#### func  Test
+
+`+"```go\nfunc Test()\n```"+`
+Documentation for func Test()
+
+Something happens.
+
+    Some code happens.
+    `))
 }
