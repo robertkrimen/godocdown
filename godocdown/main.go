@@ -25,7 +25,12 @@ http://github.com/robertkrimen/godocdown/blob/master/example.markdown
 
 Usage
 
-    -template="": The template file to use                                           
+    -output=""                                                                       
+        Write output to a file instead of stdout                                     
+        Write to stdout with -                                                       
+                                                                                     
+    -template=""                                                                     
+        The template file to use                                                     
                                                                                      
     -no-template=false                                                               
         Disable template processing                                                  
@@ -94,7 +99,7 @@ package main
 
 import (
 	"bytes"
-	"flag"
+	Flag "flag"
 	"fmt"
 	"go/build"
 	"go/doc"
@@ -116,11 +121,18 @@ const (
 )
 
 var (
-	flag_signature  = flag.Bool("signature", false, "Add godocdown signature to the end of the documentation")
+	flag            = Flag.NewFlagSet("", Flag.ExitOnError)
+	flag_signature  = flag.Bool("signature", false, string(0))
 	flag_plain      = flag.Bool("plain", false, "Emit standard Markdown, rather than Github Flavored Markdown (the default)")
 	flag_heading    = flag.String("heading", "TitleCase1Word", "Heading detection method: 1Word, TitleCase, Title, TitleCase1Word, \"\"")
 	flag_template   = flag.String("template", "", "The template file to use")
 	flag_noTemplate = flag.Bool("no-template", false, "Disable template processing")
+	flag_output     = ""
+	_               = func() byte {
+		flag.StringVar(&flag_output, "output", flag_output, "Write output to a file instead of stdout. Write to stdout with -")
+		flag.StringVar(&flag_output, "o", flag_output, string(0))
+		return 0
+	}()
 )
 
 var (
@@ -157,7 +169,7 @@ var RenderStyle = DefaultStyle
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-	flag.PrintDefaults()
+	kilt.PrintDefaults(flag)
 	executable, err := os.Stat(os.Args[0])
 	if err != nil {
 		return
@@ -536,7 +548,7 @@ func loadTemplate(document *_document) *Template.Template {
 }
 
 func main() {
-	flag.Parse()
+	flag.Parse(os.Args[1:])
 	target := flag.Arg(0)
 	fallbackUsage := false
 	if target == "" {
@@ -596,5 +608,13 @@ func main() {
 
 	documentation := buffer.String()
 	documentation = strings.TrimSpace(documentation)
-	fmt.Println(documentation)
+	if flag_output == "" || flag_output == "-" {
+		fmt.Println(documentation)
+	} else {
+		file, err := os.Create(flag_output)
+		if err != nil {
+		}
+		defer file.Close()
+		_, err = fmt.Fprintln(file, documentation)
+	}
 }

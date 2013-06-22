@@ -29,7 +29,12 @@ http://github.com/robertkrimen/godocdown/blob/master/example.markdown
 
 ### Usage
 
-    -template="": The template file to use
+    -output=""
+        Write output to a file instead of stdout
+        Write to stdout with -
+
+    -template=""
+        The template file to use
 
     -no-template=false
         Disable template processing
