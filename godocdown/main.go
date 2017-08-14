@@ -404,6 +404,10 @@ func loadDocument(target string) (*_document, error) {
 				isCommand = true
 				pkg = tmpPkg
 			default:
+				// test import, like pkg_test
+				if strings.HasSuffix(tmpPkg.Name, "_test") {
+					continue
+				}
 				// Just a regular package
 				name = tmpPkg.Name
 				pkg = tmpPkg
